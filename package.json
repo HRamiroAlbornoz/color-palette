@@ -1,0 +1,36 @@
+{
+  "name": "color-palette",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Herramienta web para generar paletas de colores aleatorias, construida para el flujo de trabajo de un estudio de branding: generar un lote, fijar los colores que sirven, volver a tirar sobre el resto hasta que la paleta cierra, y llevarse los códigos.",
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HRamiroAlbornoz/color-palette.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HRamiroAlbornoz/color-palette/issues"
+  },
+  "homepage": "https://github.com/HRamiroAlbornoz/color-palette#readme",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.12.0",
+    "jsdom": "^30.0.1",
+    "prettier": "^3.9.6",
+    "vitest": "^5.0.0"
+  }
+}

@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   createRandomHsl,
   getContrastRatio,
+  getPrimaryCode,
   getReadableTextColor,
+  hslToCss,
   hslToHex,
   hslToRgb,
   rgbToHex,
@@ -73,6 +75,25 @@ describe('hslToRgb and hslToHex', () => {
 
   it('converts a fully desaturated color to gray', () => {
     expect(hslToHex({ hue: 0, saturation: 0, lightness: 50 })).toBe('#808080');
+  });
+});
+
+describe('hslToCss', () => {
+  it('formats as a standard CSS hsl() function', () => {
+    expect(hslToCss({ hue: 210, saturation: 65, lightness: 57 })).toBe('hsl(210, 65%, 57%)');
+  });
+});
+
+describe('getPrimaryCode', () => {
+  const hsl = { hue: 210, saturation: 65, lightness: 57 };
+  const hex = '#4A91D9';
+
+  it('returns the given HEX code when the format is hex', () => {
+    expect(getPrimaryCode(hsl, hex, 'hex')).toBe('#4A91D9');
+  });
+
+  it('returns the CSS hsl() string when the format is hsl', () => {
+    expect(getPrimaryCode(hsl, hex, 'hsl')).toBe('hsl(210, 65%, 57%)');
   });
 });
 

@@ -80,6 +80,10 @@ export function hslToCss({ hue, saturation, lightness }) {
   return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
+export function getPrimaryCode(hsl, hex, format) {
+  return format === 'hsl' ? hslToCss(hsl) : hex;
+}
+
 function channelToLinear(channel) {
   const normalized = channel / 255;
   return normalized <= 0.03928 ? normalized / 12.92 : Math.pow((normalized + 0.055) / 1.055, 2.4);

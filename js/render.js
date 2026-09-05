@@ -1,4 +1,4 @@
-import { getPrimaryCode, getReadableTextColor, hslToRgb, rgbToHex } from './color.js';
+import { getPrimaryCode, getReadableTextColor, hslToHex, hslToRgb, rgbToHex } from './color.js';
 
 function createDataEntry(label, value) {
   const entry = document.createElement('div');
@@ -13,16 +13,30 @@ function createDataEntry(label, value) {
   return entry;
 }
 
-function createSwatchElement(hsl, format, onSwatchClick) {
-  const rgb = hslToRgb(hsl);
+function createLockButton(locked, textColorHex, onLockToggle) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'lock-button';
+  button.style.color = textColorHex;
+  button.setAttribute('aria-pressed', String(locked));
+  button.setAttribute('aria-label', locked ? 'Desbloquear color' : 'Bloquear color');
+  button.addEventListener('click', onLockToggle);
+  return button;
+}
+
+function createSwatchElement(color, format, onSwatchClick, onLockToggle) {
+  const rgb = hslToRgb(color);
   const hex = rgbToHex(rgb);
   const textColor = getReadableTextColor(rgb);
 
-  const primaryCode = getPrimaryCode(hsl, hex, format);
+  const primaryCode = getPrimaryCode(color, hex, format);
   const [secondaryLabel, secondaryValue] =
-    format === 'hsl' ? ['HEX', hex] : ['HSL', `${hsl.hue} ${hsl.saturation} ${hsl.lightness}`];
+    format === 'hsl'
+      ? ['HEX', hex]
+      : ['HSL', `${color.hue} ${color.saturation} ${color.lightness}`];
 
   const swatch = document.createElement('li');
+  swatch.className = 'swatch';
 
   const colorButton = document.createElement('button');
   colorButton.type = 'button';
@@ -44,13 +58,102 @@ function createSwatchElement(hsl, format, onSwatchClick) {
   );
 
   colorButton.append(codeDisplay, dataList);
-  swatch.append(colorButton);
+
+  const lockButton = createLockButton(color.locked, textColor.hex, onLockToggle);
+
+  swatch.append(colorButton, lockButton);
 
   return swatch;
 }
 
-export function renderPalette(container, colors, format, onSwatchClick = () => {}) {
+const STAGGER_STEP_MS = 40;
+
+export function renderPalette(
+  container,
+  colors,
+  format,
+  onSwatchClick = () => {},
+  onLockToggle = () => {},
+  animateEntrance = false,
+) {
   container.replaceChildren(
-    ...colors.map((hsl) => createSwatchElement(hsl, format, onSwatchClick)),
+    ...colors.map((color, index) => {
+      const swatch = createSwatchElement(color, format, onSwatchClick, () => onLockToggle(index));
+      if (animateEntrance && !color.locked) {
+        swatch.classList.add('swatch--entering');
+        swatch.style.animationDelay = `${index * STAGGER_STEP_MS}ms`;
+      }
+      return swatch;
+    }),
+  );
+}
+
+export function formatBatchDate(isoDate) {
+  return new Date(isoDate).toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+function createArchiveMessage(text) {
+  const message = document.createElement('li');
+  message.className = 'archive-message';
+  message.textContent = text;
+  return message;
+}
+
+function createBatchEntry(batch, onRestore, onDelete) {
+  const entry = document.createElement('li');
+  entry.className = 'batch-entry';
+
+  const thumbnails = document.createElement('div');
+  thumbnails.className = 'batch-thumbnails';
+  thumbnails.append(
+    ...batch.colors.map((color) => {
+      const thumbnail = document.createElement('span');
+      thumbnail.className = 'batch-thumbnail';
+      thumbnail.style.backgroundColor = hslToHex(color);
+      return thumbnail;
+    }),
+  );
+
+  const label = document.createElement('p');
+  label.className = 'batch-label';
+  label.textContent = `Lote Nº${batch.number} · ${formatBatchDate(batch.date)}`;
+
+  const restoreButton = document.createElement('button');
+  restoreButton.type = 'button';
+  restoreButton.className = 'batch-restore';
+  restoreButton.textContent = 'Restaurar';
+  restoreButton.addEventListener('click', () => onRestore(batch.number));
+
+  const deleteButton = document.createElement('button');
+  deleteButton.type = 'button';
+  deleteButton.className = 'batch-delete';
+  deleteButton.textContent = 'Borrar';
+  deleteButton.addEventListener('click', () => onDelete(batch.number));
+
+  entry.append(thumbnails, label, restoreButton, deleteButton);
+  return entry;
+}
+
+export function renderArchive(container, archive, onRestore = () => {}, onDelete = () => {}) {
+  if (!archive.available) {
+    container.replaceChildren(
+      createArchiveMessage('En este navegador no se puede guardar el archivo de paletas.'),
+    );
+    return;
+  }
+
+  if (archive.batches.length === 0) {
+    container.replaceChildren(
+      createArchiveMessage('Guardá tu primera paleta para empezar el archivo.'),
+    );
+    return;
+  }
+
+  container.replaceChildren(
+    ...archive.batches.map((batch) => createBatchEntry(batch, onRestore, onDelete)),
   );
 }

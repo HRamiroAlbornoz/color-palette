@@ -1,8 +1,8 @@
-const HUE_MAX = 360;
-const SATURATION_MIN = 45;
-const SATURATION_MAX = 75;
-const LIGHTNESS_MIN = 35;
-const LIGHTNESS_MAX = 70;
+export const HUE_MAX = 360;
+export const SATURATION_MIN = 45;
+export const SATURATION_MAX = 75;
+export const LIGHTNESS_MIN = 35;
+export const LIGHTNESS_MAX = 70;
 const MIN_HUE_SEPARATION = 20;
 const MAX_HUE_ATTEMPTS = 50;
 

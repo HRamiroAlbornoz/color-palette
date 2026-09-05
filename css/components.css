@@ -80,6 +80,32 @@ fieldset label {
   }
 }
 
+.swatch {
+  position: relative;
+}
+
+@keyframes swatch-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.swatch--entering {
+  animation: swatch-enter var(--transition-base) ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swatch--entering {
+    animation-delay: 0s !important;
+  }
+}
+
 .swatch-color {
   display: flex;
   flex-direction: column;
@@ -97,6 +123,21 @@ fieldset label {
 
 .swatch-color:hover {
   filter: brightness(1.08);
+}
+
+.lock-button {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 20px;
+  height: 20px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  transition: background-color var(--transition-fast);
+}
+
+.lock-button[aria-pressed='true'] {
+  background-color: currentColor;
 }
 
 .swatch-code {
@@ -124,6 +165,96 @@ fieldset label {
 
 .swatch-data dd {
   margin: 0;
+}
+
+.archive {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-hairline);
+}
+
+.archive-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.archive-header h2 {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.save-button,
+.batch-restore,
+.batch-delete {
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius);
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.save-button:hover,
+.batch-restore:hover,
+.batch-delete:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.save-button {
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-sans);
+  font-weight: 600;
+}
+
+.archive-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.archive-message {
+  padding: var(--space-3) 0;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+
+.batch-entry {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.batch-thumbnails {
+  display: flex;
+  gap: 2px;
+}
+
+.batch-thumbnail {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 2px;
+}
+
+.batch-label {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.batch-restore,
+.batch-delete {
+  padding: var(--space-1) var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
 }
 
 .toast {

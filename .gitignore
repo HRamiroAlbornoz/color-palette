@@ -1,0 +1,15 @@
+node_modules/
+
+coverage/
+*.log
+npm-debug.log*
+
+.vercel
+
+.impeccable/config.local.json
+.impeccable/build/
+.impeccable/review/
+.impeccable/mocks/
+
+.DS_Store
+Thumbs.db

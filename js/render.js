@@ -13,7 +13,7 @@ function createDataEntry(label, value) {
   return entry;
 }
 
-function createSwatchElement(hsl, format) {
+function createSwatchElement(hsl, format, onSwatchClick) {
   const rgb = hslToRgb(hsl);
   const hex = rgbToHex(rgb);
   const textColor = getReadableTextColor(rgb);
@@ -23,9 +23,14 @@ function createSwatchElement(hsl, format) {
     format === 'hsl' ? ['HEX', hex] : ['HSL', `${hsl.hue} ${hsl.saturation} ${hsl.lightness}`];
 
   const swatch = document.createElement('li');
-  swatch.className = 'swatch';
-  swatch.style.backgroundColor = hex;
-  swatch.style.color = textColor.hex;
+
+  const colorButton = document.createElement('button');
+  colorButton.type = 'button';
+  colorButton.className = 'swatch-color';
+  colorButton.style.backgroundColor = hex;
+  colorButton.style.color = textColor.hex;
+  colorButton.setAttribute('aria-label', `Copiar ${primaryCode}`);
+  colorButton.addEventListener('click', () => onSwatchClick(primaryCode));
 
   const codeDisplay = document.createElement('p');
   codeDisplay.className = 'swatch-code';
@@ -38,11 +43,14 @@ function createSwatchElement(hsl, format) {
     createDataEntry('AA', `${textColor.contrastRatio.toFixed(1)}:1`),
   );
 
-  swatch.append(codeDisplay, dataList);
+  colorButton.append(codeDisplay, dataList);
+  swatch.append(colorButton);
 
   return swatch;
 }
 
-export function renderPalette(container, colors, format) {
-  container.replaceChildren(...colors.map((hsl) => createSwatchElement(hsl, format)));
+export function renderPalette(container, colors, format, onSwatchClick = () => {}) {
+  container.replaceChildren(
+    ...colors.map((hsl) => createSwatchElement(hsl, format, onSwatchClick)),
+  );
 }

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderPalette } from '../js/render.js';
 
 describe('renderPalette', () => {
@@ -22,9 +22,9 @@ describe('renderPalette', () => {
   it('shows the exact HEX code matching the swatch background color', () => {
     renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57 }], 'hex');
 
-    const swatch = container.firstElementChild;
-    expect(swatch.textContent).toContain('#4A91D9');
-    expect(swatch.style.backgroundColor).toBe('rgb(74, 145, 217)');
+    const colorButton = container.querySelector('.swatch-color');
+    expect(colorButton.textContent).toContain('#4A91D9');
+    expect(colorButton.style.backgroundColor).toBe('rgb(74, 145, 217)');
   });
 
   it('shows the HSL triplet and a contrast ratio', () => {
@@ -47,6 +47,23 @@ describe('renderPalette', () => {
     );
 
     expect(container.children).toHaveLength(2);
+  });
+
+  it('renders the color area as a button reachable by keyboard', () => {
+    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57 }], 'hex');
+
+    const colorButton = container.querySelector('.swatch-color');
+    expect(colorButton.tagName).toBe('BUTTON');
+    expect(colorButton.type).toBe('button');
+  });
+
+  it('invokes the click callback with the primary code shown on the swatch', () => {
+    const onSwatchClick = vi.fn();
+    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57 }], 'hex', onSwatchClick);
+
+    container.querySelector('.swatch-color').click();
+
+    expect(onSwatchClick).toHaveBeenCalledWith('#4A91D9');
   });
 
   describe('format', () => {

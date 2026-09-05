@@ -80,15 +80,23 @@ fieldset label {
   }
 }
 
-.swatch {
+.swatch-color {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  align-items: stretch;
   gap: var(--space-1);
+  width: 100%;
   min-height: 120px;
   padding: var(--space-2);
   border: 1px solid var(--color-hairline);
   border-radius: var(--radius);
+  text-align: left;
+  transition: filter var(--transition-fast);
+}
+
+.swatch-color:hover {
+  filter: brightness(1.08);
 }
 
 .swatch-code {
@@ -116,4 +124,21 @@ fieldset label {
 
 .swatch-data dd {
   margin: 0;
+}
+
+.toast {
+  position: fixed;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-ink);
+  color: var(--color-bg);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+.toast:empty {
+  display: none;
 }

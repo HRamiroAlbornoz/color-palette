@@ -34,6 +34,7 @@ async function handleSwatchClick(code) {
 function handleLockToggle(index) {
   colors = toggleLock(colors, index);
   render();
+  grid.querySelectorAll('.lock-button')[index].focus();
 }
 
 function render() {

@@ -1,0 +1,119 @@
+header {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-hairline);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+main {
+  padding: var(--space-4);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+@media (min-width: 768px) {
+  .controls {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.generate-button {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius);
+  transition: opacity var(--transition-fast);
+}
+
+.generate-button:hover {
+  opacity: 0.85;
+}
+
+fieldset {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+}
+
+legend {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 0 var(--space-1);
+}
+
+fieldset label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-mono);
+}
+
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .palette-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .palette-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  min-height: 120px;
+  padding: var(--space-2);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius);
+}
+
+.swatch-hex {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.swatch-data {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.swatch-data > div {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.swatch-data dt {
+  opacity: 0.7;
+}
+
+.swatch-data dd {
+  margin: 0;
+}

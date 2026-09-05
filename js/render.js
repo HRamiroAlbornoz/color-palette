@@ -1,4 +1,4 @@
-import { getPrimaryCode, getReadableTextColor, hslToRgb, rgbToHex } from './color.js';
+import { getPrimaryCode, getReadableTextColor, hslToHex, hslToRgb, rgbToHex } from './color.js';
 
 function createDataEntry(label, value) {
   const entry = document.createElement('div');
@@ -77,5 +77,75 @@ export function renderPalette(
     ...colors.map((color, index) =>
       createSwatchElement(color, format, onSwatchClick, () => onLockToggle(index)),
     ),
+  );
+}
+
+export function formatBatchDate(isoDate) {
+  return new Date(isoDate).toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+function createArchiveMessage(text) {
+  const message = document.createElement('li');
+  message.className = 'archive-message';
+  message.textContent = text;
+  return message;
+}
+
+function createBatchEntry(batch, onRestore, onDelete) {
+  const entry = document.createElement('li');
+  entry.className = 'batch-entry';
+
+  const thumbnails = document.createElement('div');
+  thumbnails.className = 'batch-thumbnails';
+  thumbnails.append(
+    ...batch.colors.map((color) => {
+      const thumbnail = document.createElement('span');
+      thumbnail.className = 'batch-thumbnail';
+      thumbnail.style.backgroundColor = hslToHex(color);
+      return thumbnail;
+    }),
+  );
+
+  const label = document.createElement('p');
+  label.className = 'batch-label';
+  label.textContent = `Lote Nº${batch.number} · ${formatBatchDate(batch.date)}`;
+
+  const restoreButton = document.createElement('button');
+  restoreButton.type = 'button';
+  restoreButton.className = 'batch-restore';
+  restoreButton.textContent = 'Restaurar';
+  restoreButton.addEventListener('click', () => onRestore(batch.number));
+
+  const deleteButton = document.createElement('button');
+  deleteButton.type = 'button';
+  deleteButton.className = 'batch-delete';
+  deleteButton.textContent = 'Borrar';
+  deleteButton.addEventListener('click', () => onDelete(batch.number));
+
+  entry.append(thumbnails, label, restoreButton, deleteButton);
+  return entry;
+}
+
+export function renderArchive(container, archive, onRestore = () => {}, onDelete = () => {}) {
+  if (!archive.available) {
+    container.replaceChildren(
+      createArchiveMessage('En este navegador no se puede guardar el archivo de paletas.'),
+    );
+    return;
+  }
+
+  if (archive.batches.length === 0) {
+    container.replaceChildren(
+      createArchiveMessage('Guardá tu primera paleta para empezar el archivo.'),
+    );
+    return;
+  }
+
+  container.replaceChildren(
+    ...archive.batches.map((batch) => createBatchEntry(batch, onRestore, onDelete)),
   );
 }

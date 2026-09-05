@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { renderPalette } from '../js/render.js';
+import { renderArchive, renderPalette } from '../js/render.js';
 
 describe('renderPalette', () => {
   let container;
@@ -134,5 +134,66 @@ describe('renderPalette', () => {
       const swatch = container.firstElementChild;
       expect(swatch.querySelector('.swatch-code').textContent).toBe('hsl(210, 65%, 57%)');
     });
+  });
+});
+
+describe('renderArchive', () => {
+  let container;
+
+  beforeEach(() => {
+    container = document.createElement('ul');
+  });
+
+  it('shows an explanatory message when localStorage is not available', () => {
+    renderArchive(container, { available: false, batches: [] });
+
+    expect(container.textContent).toContain('En este navegador no se puede guardar');
+  });
+
+  it('shows an explanatory empty state when there are no saved batches yet', () => {
+    renderArchive(container, { available: true, batches: [] });
+
+    expect(container.textContent).toContain('Guardá tu primera paleta');
+  });
+
+  it('renders one entry per batch with its number, date and color thumbnails', () => {
+    const batches = [
+      {
+        number: 3,
+        date: '2026-09-05T12:00:00.000Z',
+        colors: [
+          { hue: 210, saturation: 65, lightness: 57 },
+          { hue: 30, saturation: 60, lightness: 50 },
+        ],
+      },
+    ];
+
+    renderArchive(container, { available: true, batches });
+
+    const entry = container.querySelector('.batch-entry');
+    expect(entry.textContent).toContain('Lote Nº3');
+    expect(entry.querySelectorAll('.batch-thumbnail')).toHaveLength(2);
+  });
+
+  it('invokes the restore callback with the clicked batch number', () => {
+    const onRestore = vi.fn();
+    const batches = [{ number: 5, date: new Date().toISOString(), colors: [] }];
+
+    renderArchive(container, { available: true, batches }, onRestore);
+
+    container.querySelector('.batch-restore').click();
+
+    expect(onRestore).toHaveBeenCalledWith(5);
+  });
+
+  it('invokes the delete callback with the clicked batch number', () => {
+    const onDelete = vi.fn();
+    const batches = [{ number: 5, date: new Date().toISOString(), colors: [] }];
+
+    renderArchive(container, { available: true, batches }, () => {}, onDelete);
+
+    container.querySelector('.batch-delete').click();
+
+    expect(onDelete).toHaveBeenCalledWith(5);
   });
 });

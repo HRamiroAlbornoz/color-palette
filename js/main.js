@@ -5,12 +5,23 @@ import {
   regeneratePalette,
   resizePalette,
   toggleLock,
+  unlockAll,
 } from './palette.js';
-import { renderPalette } from './render.js';
+import { formatBatchDate, renderArchive, renderPalette } from './render.js';
+import {
+  MAX_BATCHES,
+  addBatch,
+  findBatch,
+  loadArchive,
+  persistArchive,
+  removeBatch,
+} from './storage.js';
 import { createToast } from './toast.js';
 
 const grid = document.querySelector('#palette-grid');
 const generateButton = document.querySelector('#generate-button');
+const saveBatchButton = document.querySelector('#save-batch-button');
+const archiveList = document.querySelector('#archive-list');
 const sizeInputs = document.querySelectorAll('input[name="palette-size"]');
 const formatInputs = document.querySelectorAll('input[name="color-format"]');
 const toast = createToast(document.querySelector('#toast'));
@@ -18,6 +29,10 @@ const toast = createToast(document.querySelector('#toast'));
 const initialSize = Number(document.querySelector('input[name="palette-size"]:checked').value);
 let colors = createPalette(initialSize);
 let format = document.querySelector('input[name="color-format"]:checked').value;
+
+const initialArchive = loadArchive();
+const archiveAvailable = initialArchive.available;
+let batches = initialArchive.batches;
 
 async function handleSwatchClick(code) {
   const result = await copyToClipboard(code);
@@ -33,15 +48,61 @@ async function handleSwatchClick(code) {
 
 function handleLockToggle(index) {
   colors = toggleLock(colors, index);
-  render();
+  renderPaletteGrid();
   grid.querySelectorAll('.lock-button')[index].focus();
 }
 
-function render() {
+function handleRestoreBatch(number) {
+  const batch = findBatch(batches, number);
+  if (!batch) {
+    return;
+  }
+
+  colors = unlockAll(batch.colors);
+
+  const matchingSizeInput = Array.from(sizeInputs).find(
+    (input) => Number(input.value) === colors.length,
+  );
+  if (matchingSizeInput) {
+    matchingSizeInput.checked = true;
+  }
+
+  renderPaletteGrid();
+}
+
+function handleDeleteBatch(number) {
+  const batch = findBatch(batches, number);
+  if (!batch) {
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `¿Borrar el lote Nº${batch.number} guardado el ${formatBatchDate(batch.date)}?`,
+  );
+  if (!confirmed) {
+    return;
+  }
+
+  batches = removeBatch(batches, number);
+  persistArchive(batches);
+  renderArchiveList();
+}
+
+function renderPaletteGrid() {
   renderPalette(grid, colors, format, handleSwatchClick, handleLockToggle);
 }
 
-render();
+function renderArchiveList() {
+  renderArchive(
+    archiveList,
+    { available: archiveAvailable, batches },
+    handleRestoreBatch,
+    handleDeleteBatch,
+  );
+}
+
+renderPaletteGrid();
+renderArchiveList();
 
 generateButton.addEventListener('click', () => {
   if (isFullyLocked(colors)) {
@@ -50,19 +111,43 @@ generateButton.addEventListener('click', () => {
   }
 
   colors = regeneratePalette(colors);
-  render();
+  renderPaletteGrid();
+});
+
+saveBatchButton.addEventListener('click', () => {
+  if (!archiveAvailable) {
+    toast.show('En este navegador no se puede guardar el archivo de paletas.');
+    return;
+  }
+
+  const result = addBatch(batches, colors);
+  if (!result.ok) {
+    toast.show(
+      `El archivo llegó a su tope de ${MAX_BATCHES} lotes: borrá alguno para guardar uno nuevo.`,
+    );
+    return;
+  }
+
+  batches = result.batches;
+  const persisted = persistArchive(batches);
+  toast.show(
+    persisted
+      ? 'Paleta guardada en el archivo.'
+      : 'No se pudo guardar la paleta en este navegador.',
+  );
+  renderArchiveList();
 });
 
 sizeInputs.forEach((input) => {
   input.addEventListener('change', (event) => {
     colors = resizePalette(colors, Number(event.target.value));
-    render();
+    renderPaletteGrid();
   });
 });
 
 formatInputs.forEach((input) => {
   input.addEventListener('change', (event) => {
     format = event.target.value;
-    render();
+    renderPaletteGrid();
   });
 });

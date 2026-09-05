@@ -33,6 +33,10 @@ export function isFullyLocked(colors) {
   return colors.every((color) => color.locked);
 }
 
+export function unlockAll(colors) {
+  return colors.map((color) => ({ ...color, locked: false }));
+}
+
 export function regeneratePalette(colors) {
   const usedHues = colors.filter((color) => color.locked).map((color) => color.hue);
   const regenerated = [];

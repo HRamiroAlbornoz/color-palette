@@ -5,6 +5,7 @@ import {
   regeneratePalette,
   resizePalette,
   toggleLock,
+  unlockAll,
 } from '../js/palette.js';
 
 describe('createPalette', () => {
@@ -112,5 +113,28 @@ describe('regeneratePalette', () => {
     const regenerated = regeneratePalette(original);
 
     expect(regenerated).toEqual(original);
+  });
+});
+
+describe('unlockAll', () => {
+  it('marks every color as unlocked, regardless of its previous state', () => {
+    const colors = [
+      { hue: 210, saturation: 65, lightness: 57, locked: true },
+      { hue: 30, saturation: 60, lightness: 50, locked: false },
+    ];
+
+    const unlocked = unlockAll(colors);
+
+    unlocked.forEach((color) => expect(color.locked).toBe(false));
+  });
+
+  it('keeps the hue, saturation and lightness of each color unchanged', () => {
+    const colors = [{ hue: 210, saturation: 65, lightness: 57, locked: true }];
+
+    const [unlocked] = unlockAll(colors);
+
+    expect(unlocked.hue).toBe(210);
+    expect(unlocked.saturation).toBe(65);
+    expect(unlocked.lightness).toBe(57);
   });
 });

@@ -83,8 +83,14 @@ function handleDeleteBatch(number) {
     return;
   }
 
-  batches = removeBatch(batches, number);
-  persistArchive(batches);
+  const updatedBatches = removeBatch(batches, number);
+  const persisted = persistArchive(updatedBatches);
+  if (!persisted) {
+    toast.show('No se pudo borrar la paleta en este navegador.');
+    return;
+  }
+
+  batches = updatedBatches;
   renderArchiveList();
 }
 
@@ -128,13 +134,14 @@ saveBatchButton.addEventListener('click', () => {
     return;
   }
 
+  const persisted = persistArchive(result.batches);
+  if (!persisted) {
+    toast.show('No se pudo guardar la paleta en este navegador.');
+    return;
+  }
+
   batches = result.batches;
-  const persisted = persistArchive(batches);
-  toast.show(
-    persisted
-      ? 'Paleta guardada en el archivo.'
-      : 'No se pudo guardar la paleta en este navegador.',
-  );
+  toast.show('Paleta guardada en el archivo.');
   renderArchiveList();
 });
 

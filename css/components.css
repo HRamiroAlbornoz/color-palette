@@ -100,6 +100,12 @@ fieldset label {
   animation: swatch-enter var(--transition-base) ease-out both;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .swatch--entering {
+    animation-delay: 0s !important;
+  }
+}
+
 .swatch-color {
   display: flex;
   flex-direction: column;

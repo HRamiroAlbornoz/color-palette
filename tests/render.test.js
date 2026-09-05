@@ -10,8 +10,8 @@ describe('renderPalette', () => {
 
   it('renders one list item per color', () => {
     const colors = [
-      { hue: 210, saturation: 65, lightness: 57 },
-      { hue: 30, saturation: 60, lightness: 50 },
+      { hue: 210, saturation: 65, lightness: 57, locked: false },
+      { hue: 30, saturation: 60, lightness: 50, locked: false },
     ];
 
     renderPalette(container, colors, 'hex');
@@ -20,7 +20,7 @@ describe('renderPalette', () => {
   });
 
   it('shows the exact HEX code matching the swatch background color', () => {
-    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57 }], 'hex');
+    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57, locked: false }], 'hex');
 
     const colorButton = container.querySelector('.swatch-color');
     expect(colorButton.textContent).toContain('#4A91D9');
@@ -28,7 +28,7 @@ describe('renderPalette', () => {
   });
 
   it('shows the HSL triplet and a contrast ratio', () => {
-    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57 }], 'hex');
+    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57, locked: false }], 'hex');
 
     const swatch = container.firstElementChild;
     expect(swatch.textContent).toContain('210 65 57');
@@ -36,12 +36,12 @@ describe('renderPalette', () => {
   });
 
   it('replaces previous content on re-render instead of appending', () => {
-    renderPalette(container, [{ hue: 0, saturation: 50, lightness: 50 }], 'hex');
+    renderPalette(container, [{ hue: 0, saturation: 50, lightness: 50, locked: false }], 'hex');
     renderPalette(
       container,
       [
-        { hue: 0, saturation: 50, lightness: 50 },
-        { hue: 180, saturation: 50, lightness: 50 },
+        { hue: 0, saturation: 50, lightness: 50, locked: false },
+        { hue: 180, saturation: 50, lightness: 50, locked: false },
       ],
       'hex',
     );
@@ -50,7 +50,7 @@ describe('renderPalette', () => {
   });
 
   it('renders the color area as a button reachable by keyboard', () => {
-    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57 }], 'hex');
+    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57, locked: false }], 'hex');
 
     const colorButton = container.querySelector('.swatch-color');
     expect(colorButton.tagName).toBe('BUTTON');
@@ -59,15 +59,60 @@ describe('renderPalette', () => {
 
   it('invokes the click callback with the primary code shown on the swatch', () => {
     const onSwatchClick = vi.fn();
-    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57 }], 'hex', onSwatchClick);
+    renderPalette(
+      container,
+      [{ hue: 210, saturation: 65, lightness: 57, locked: false }],
+      'hex',
+      onSwatchClick,
+    );
 
     container.querySelector('.swatch-color').click();
 
     expect(onSwatchClick).toHaveBeenCalledWith('#4A91D9');
   });
 
+  describe('lock button', () => {
+    const colors = [
+      { hue: 210, saturation: 65, lightness: 57, locked: false },
+      { hue: 30, saturation: 60, lightness: 50, locked: true },
+    ];
+
+    it('renders it as a sibling of the color button, never nested inside it', () => {
+      renderPalette(container, colors, 'hex');
+
+      const swatch = container.firstElementChild;
+      expect(swatch.querySelector('.swatch-color .lock-button')).toBeNull();
+      expect(swatch.children).toHaveLength(2);
+    });
+
+    it('exposes the locked state through aria-pressed', () => {
+      renderPalette(container, colors, 'hex');
+
+      const lockButtons = container.querySelectorAll('.lock-button');
+      expect(lockButtons[0].getAttribute('aria-pressed')).toBe('false');
+      expect(lockButtons[1].getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('changes the accessible label depending on the locked state', () => {
+      renderPalette(container, colors, 'hex');
+
+      const lockButtons = container.querySelectorAll('.lock-button');
+      expect(lockButtons[0].getAttribute('aria-label')).toBe('Bloquear color');
+      expect(lockButtons[1].getAttribute('aria-label')).toBe('Desbloquear color');
+    });
+
+    it('invokes the lock toggle callback with the index of the clicked swatch', () => {
+      const onLockToggle = vi.fn();
+      renderPalette(container, colors, 'hex', () => {}, onLockToggle);
+
+      container.querySelectorAll('.lock-button')[1].click();
+
+      expect(onLockToggle).toHaveBeenCalledWith(1);
+    });
+  });
+
   describe('format', () => {
-    const hsl = { hue: 210, saturation: 65, lightness: 57 };
+    const hsl = { hue: 210, saturation: 65, lightness: 57, locked: false };
 
     it('shows the HEX code as the primary text in hex format', () => {
       renderPalette(container, [hsl], 'hex');

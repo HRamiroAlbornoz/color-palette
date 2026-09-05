@@ -1,5 +1,11 @@
 import { copyToClipboard } from './clipboard.js';
-import { createPalette, resizePalette } from './palette.js';
+import {
+  createPalette,
+  isFullyLocked,
+  regeneratePalette,
+  resizePalette,
+  toggleLock,
+} from './palette.js';
 import { renderPalette } from './render.js';
 import { createToast } from './toast.js';
 
@@ -25,14 +31,24 @@ async function handleSwatchClick(code) {
   }
 }
 
+function handleLockToggle(index) {
+  colors = toggleLock(colors, index);
+  render();
+}
+
 function render() {
-  renderPalette(grid, colors, format, handleSwatchClick);
+  renderPalette(grid, colors, format, handleSwatchClick, handleLockToggle);
 }
 
 render();
 
 generateButton.addEventListener('click', () => {
-  colors = createPalette(colors.length);
+  if (isFullyLocked(colors)) {
+    toast.show('Todos los colores están bloqueados: no hay nada para regenerar.');
+    return;
+  }
+
+  colors = regeneratePalette(colors);
   render();
 });
 

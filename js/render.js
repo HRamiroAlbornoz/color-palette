@@ -13,16 +13,30 @@ function createDataEntry(label, value) {
   return entry;
 }
 
-function createSwatchElement(hsl, format, onSwatchClick) {
-  const rgb = hslToRgb(hsl);
+function createLockButton(locked, textColorHex, onLockToggle) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'lock-button';
+  button.style.color = textColorHex;
+  button.setAttribute('aria-pressed', String(locked));
+  button.setAttribute('aria-label', locked ? 'Desbloquear color' : 'Bloquear color');
+  button.addEventListener('click', onLockToggle);
+  return button;
+}
+
+function createSwatchElement(color, format, onSwatchClick, onLockToggle) {
+  const rgb = hslToRgb(color);
   const hex = rgbToHex(rgb);
   const textColor = getReadableTextColor(rgb);
 
-  const primaryCode = getPrimaryCode(hsl, hex, format);
+  const primaryCode = getPrimaryCode(color, hex, format);
   const [secondaryLabel, secondaryValue] =
-    format === 'hsl' ? ['HEX', hex] : ['HSL', `${hsl.hue} ${hsl.saturation} ${hsl.lightness}`];
+    format === 'hsl'
+      ? ['HEX', hex]
+      : ['HSL', `${color.hue} ${color.saturation} ${color.lightness}`];
 
   const swatch = document.createElement('li');
+  swatch.className = 'swatch';
 
   const colorButton = document.createElement('button');
   colorButton.type = 'button';
@@ -44,13 +58,24 @@ function createSwatchElement(hsl, format, onSwatchClick) {
   );
 
   colorButton.append(codeDisplay, dataList);
-  swatch.append(colorButton);
+
+  const lockButton = createLockButton(color.locked, textColor.hex, onLockToggle);
+
+  swatch.append(colorButton, lockButton);
 
   return swatch;
 }
 
-export function renderPalette(container, colors, format, onSwatchClick = () => {}) {
+export function renderPalette(
+  container,
+  colors,
+  format,
+  onSwatchClick = () => {},
+  onLockToggle = () => {},
+) {
   container.replaceChildren(
-    ...colors.map((hsl) => createSwatchElement(hsl, format, onSwatchClick)),
+    ...colors.map((color, index) =>
+      createSwatchElement(color, format, onSwatchClick, () => onLockToggle(index)),
+    ),
   );
 }

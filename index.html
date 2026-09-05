@@ -6,9 +6,45 @@
     <title>Generador de Paletas · Colorfly Studio</title>
     <link rel="stylesheet" href="css/tokens.css" />
     <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
   </head>
   <body>
-    <h1>Colorfly Studio</h1>
-    <p>Generador de paletas — en construcción.</p>
+    <header>
+      <p>Colorfly Studio</p>
+    </header>
+    <main>
+      <section class="controls" aria-label="Controles de generación">
+        <button type="button" id="generate-button" class="generate-button">Generar paleta</button>
+        <fieldset>
+          <legend>Tamaño</legend>
+          <label>
+            <input type="radio" name="palette-size" value="6" checked />
+            6
+          </label>
+          <label>
+            <input type="radio" name="palette-size" value="8" />
+            8
+          </label>
+          <label>
+            <input type="radio" name="palette-size" value="9" />
+            9
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Formato</legend>
+          <label>
+            <input type="radio" name="color-format" value="hex" checked />
+            HEX
+          </label>
+          <label>
+            <input type="radio" name="color-format" value="hsl" />
+            HSL
+          </label>
+        </fieldset>
+      </section>
+      <ul class="palette-grid" id="palette-grid" role="list" aria-label="Paleta generada"></ul>
+    </main>
+    <p id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></p>
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>

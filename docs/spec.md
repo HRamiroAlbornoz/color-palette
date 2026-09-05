@@ -90,6 +90,8 @@ Cada criterio se responde con sí o no mirando la aplicación.
    clic. Ninguno de los dos desaparece de la pantalla.
 5. El código HEX de una muestra corresponde exactamente a su color de fondo, verificable con un
    cuentagotas.
+6. Cada muestra expone su ratio de contraste (ej. «4.8:1») calculado entre el color de fondo de la
+   tarjeta y el color de texto que la propia tarjeta eligió para escribir encima.
 
 ### F3 · Copiar al portapapeles y microfeedback
 

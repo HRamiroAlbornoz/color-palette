@@ -18,6 +18,8 @@ import {
 } from './storage.js';
 import { createToast } from './toast.js';
 
+const ANIMATE_ENTRANCE = true;
+
 const grid = document.querySelector('#palette-grid');
 const generateButton = document.querySelector('#generate-button');
 const saveBatchButton = document.querySelector('#save-batch-button');
@@ -94,8 +96,8 @@ function handleDeleteBatch(number) {
   renderArchiveList();
 }
 
-function renderPaletteGrid() {
-  renderPalette(grid, colors, format, handleSwatchClick, handleLockToggle);
+function renderPaletteGrid(animateEntrance = false) {
+  renderPalette(grid, colors, format, handleSwatchClick, handleLockToggle, animateEntrance);
 }
 
 function renderArchiveList() {
@@ -117,7 +119,7 @@ generateButton.addEventListener('click', () => {
   }
 
   colors = regeneratePalette(colors);
-  renderPaletteGrid();
+  renderPaletteGrid(ANIMATE_ENTRANCE);
 });
 
 saveBatchButton.addEventListener('click', () => {

@@ -66,17 +66,25 @@ function createSwatchElement(color, format, onSwatchClick, onLockToggle) {
   return swatch;
 }
 
+const STAGGER_STEP_MS = 40;
+
 export function renderPalette(
   container,
   colors,
   format,
   onSwatchClick = () => {},
   onLockToggle = () => {},
+  animateEntrance = false,
 ) {
   container.replaceChildren(
-    ...colors.map((color, index) =>
-      createSwatchElement(color, format, onSwatchClick, () => onLockToggle(index)),
-    ),
+    ...colors.map((color, index) => {
+      const swatch = createSwatchElement(color, format, onSwatchClick, () => onLockToggle(index));
+      if (animateEntrance && !color.locked) {
+        swatch.classList.add('swatch--entering');
+        swatch.style.animationDelay = `${index * STAGGER_STEP_MS}ms`;
+      }
+      return swatch;
+    }),
   );
 }
 

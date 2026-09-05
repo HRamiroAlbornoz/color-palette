@@ -71,6 +71,53 @@ describe('renderPalette', () => {
     expect(onSwatchClick).toHaveBeenCalledWith('#4A91D9');
   });
 
+  describe('entrance animation', () => {
+    const colors = [
+      { hue: 210, saturation: 65, lightness: 57, locked: false },
+      { hue: 30, saturation: 60, lightness: 50, locked: true },
+      { hue: 90, saturation: 55, lightness: 45, locked: false },
+    ];
+
+    it('does not animate any swatch when entrance animation is not requested', () => {
+      renderPalette(container, colors, 'hex');
+
+      expect(container.querySelectorAll('.swatch--entering')).toHaveLength(0);
+    });
+
+    it('animates only the unlocked swatches when entrance animation is requested', () => {
+      const animateEntrance = true;
+      renderPalette(
+        container,
+        colors,
+        'hex',
+        () => {},
+        () => {},
+        animateEntrance,
+      );
+
+      const swatches = container.querySelectorAll('.swatch');
+      expect(swatches[0].classList.contains('swatch--entering')).toBe(true);
+      expect(swatches[1].classList.contains('swatch--entering')).toBe(false);
+      expect(swatches[2].classList.contains('swatch--entering')).toBe(true);
+    });
+
+    it('staggers the animation delay by swatch index', () => {
+      const animateEntrance = true;
+      renderPalette(
+        container,
+        colors,
+        'hex',
+        () => {},
+        () => {},
+        animateEntrance,
+      );
+
+      const swatches = container.querySelectorAll('.swatch');
+      expect(swatches[0].style.animationDelay).toBe('0ms');
+      expect(swatches[2].style.animationDelay).toBe('80ms');
+    });
+  });
+
   describe('lock button', () => {
     const colors = [
       { hue: 210, saturation: 65, lightness: 57, locked: false },

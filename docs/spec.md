@@ -182,5 +182,26 @@ especificación responde **qué hace** la pantalla; ese archivo responde **cómo
 
 ## 9 · Flujos del recorrido
 
-Se completa en el Cierre del release 1, recorriendo la aplicación publicada. Hasta entonces queda
-vacía a propósito: los caminos reales se descubren usando, no imaginando.
+Completado en el Cierre del release 1, recorriendo la aplicación publicada en producción
+(https://color-palette-alpha.vercel.app).
+
+**Principal.** Generar paleta → bloquear dos colores → regenerar (los bloqueados no cambian) →
+cambiar tamaño → cambiar formato → copiar un color → guardar el lote → restaurar (el selector de
+tamaño se sincroniza) → borrar el lote con confirmación. Las seis features componen sin fricción:
+ninguna pisa el estado de la otra.
+
+**Usuario nuevo.** Al abrir la página sin datos previos: paleta de 6 colores ya generada, formato
+HEX, archivo vacío con el mensaje que explica cómo llenarlo. No hay pantalla en blanco en ningún
+punto de este camino.
+
+**Recuperación.** Recargar a mitad de una interacción (color bloqueado, tamaño cambiado) reinicia la
+paleta en pantalla —es la decisión tomada en la sección 2— pero el archivo de lotes guardados
+sobrevive intacto a la recarga, incluida la sincronización del tamaño al restaurar un lote después de
+recargar.
+
+**Error.** Portapapeles no disponible → aviso en lenguaje llano, nunca el error técnico.
+`localStorage` no disponible → el archivo lo explica y el resto de la app sigue funcionando. Un lote
+corrupto en `localStorage` (probado escribiendo un valor fuera de rango a mano) se descarta solo a
+él, sin perder los demás lotes guardados.
+
+Ningún bug de interacción entre features apareció en este recorrido.

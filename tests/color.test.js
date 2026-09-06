@@ -56,6 +56,17 @@ describe('createRandomHsl', () => {
 
     expect(hue).toBe(0);
   });
+
+  it('keeps the most-separated candidate seen, not the last one tried, when none satisfies the minimum separation', () => {
+    const hues = [10, 3, 3, 18, 3];
+    const draws = hues.map((hue) => hue / 360);
+    let callIndex = 0;
+    vi.spyOn(Math, 'random').mockImplementation(() => draws[callIndex++ % draws.length]);
+
+    const { hue } = createRandomHsl([0]);
+
+    expect(hue).toBe(18);
+  });
 });
 
 describe('hslToRgb and hslToHex', () => {

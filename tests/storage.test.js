@@ -72,6 +72,21 @@ describe('loadArchive', () => {
     expect(loadArchive()).toEqual({ available: true, batches: [] });
   });
 
+  it('keeps the valid batches and drops only the corrupted one, instead of discarding the whole archive', () => {
+    const validBatch = { number: 1, date: new Date().toISOString(), colors: makeColors(6) };
+    const corruptedBatch = { number: 2, date: new Date().toISOString(), colors: makeColors(7) };
+    const anotherValidBatch = { number: 3, date: new Date().toISOString(), colors: makeColors(9) };
+    localStorage.setItem(
+      'colorfly-palette-archive',
+      JSON.stringify({ batches: [validBatch, corruptedBatch, anotherValidBatch] }),
+    );
+
+    expect(loadArchive()).toEqual({
+      available: true,
+      batches: [validBatch, anotherValidBatch],
+    });
+  });
+
   it('reports the archive as unavailable when localStorage cannot be read', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('storage disabled');

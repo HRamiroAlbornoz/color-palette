@@ -33,8 +33,8 @@ function isValidBatch(batch) {
   );
 }
 
-function isValidArchive(data) {
-  return isRecord(data) && Array.isArray(data.batches) && data.batches.every(isValidBatch);
+function isValidArchiveShape(data) {
+  return isRecord(data) && Array.isArray(data.batches);
 }
 
 export function loadArchive() {
@@ -51,7 +51,8 @@ export function loadArchive() {
 
   try {
     const parsed = JSON.parse(raw);
-    return { available: true, batches: isValidArchive(parsed) ? parsed.batches : [] };
+    const batches = isValidArchiveShape(parsed) ? parsed.batches.filter(isValidBatch) : [];
+    return { available: true, batches };
   } catch {
     return { available: true, batches: [] };
   }

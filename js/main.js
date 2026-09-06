@@ -7,7 +7,7 @@ import {
   toggleLock,
   unlockAll,
 } from './palette.js';
-import { formatBatchDate, renderArchive, renderPalette } from './render.js';
+import { focusLockButton, formatBatchDate, renderArchive, renderPalette } from './render.js';
 import {
   MAX_BATCHES,
   addBatch,
@@ -51,7 +51,7 @@ async function handleSwatchClick(code) {
 function handleLockToggle(index) {
   colors = toggleLock(colors, index);
   renderPaletteGrid();
-  grid.querySelectorAll('.lock-button')[index].focus();
+  focusLockButton(grid, index);
 }
 
 function handleRestoreBatch(number) {

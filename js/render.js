@@ -24,6 +24,8 @@ function createLockButton(locked, textColorHex, onLockToggle) {
   return button;
 }
 
+let nextSwatchId = 0;
+
 function createSwatchElement(color, format, onSwatchClick, onLockToggle) {
   const rgb = hslToRgb(color);
   const hex = rgbToHex(rgb);
@@ -38,12 +40,15 @@ function createSwatchElement(color, format, onSwatchClick, onLockToggle) {
   const swatch = document.createElement('li');
   swatch.className = 'swatch';
 
+  const dataListId = `swatch-data-${nextSwatchId++}`;
+
   const colorButton = document.createElement('button');
   colorButton.type = 'button';
   colorButton.className = 'swatch-color';
   colorButton.style.backgroundColor = hex;
   colorButton.style.color = textColor.hex;
   colorButton.setAttribute('aria-label', `Copiar ${primaryCode}`);
+  colorButton.setAttribute('aria-describedby', dataListId);
   colorButton.addEventListener('click', () => onSwatchClick(primaryCode));
 
   const codeDisplay = document.createElement('p');
@@ -51,6 +56,7 @@ function createSwatchElement(color, format, onSwatchClick, onLockToggle) {
   codeDisplay.textContent = primaryCode;
 
   const dataList = document.createElement('dl');
+  dataList.id = dataListId;
   dataList.className = 'swatch-data';
   dataList.append(
     createDataEntry(secondaryLabel, secondaryValue),
@@ -86,6 +92,10 @@ export function renderPalette(
       return swatch;
     }),
   );
+}
+
+export function focusLockButton(container, index) {
+  container.querySelectorAll('.lock-button')[index]?.focus();
 }
 
 export function formatBatchDate(isoDate) {

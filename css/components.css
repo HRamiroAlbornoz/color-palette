@@ -1,8 +1,27 @@
 header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-hairline);
   font-family: var(--font-mono);
   font-size: 0.875rem;
+}
+
+.header-meta {
+  font-size: 0.75rem;
+}
+
+footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-hairline);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+footer a {
+  color: inherit;
 }
 
 main {
@@ -76,7 +95,7 @@ fieldset label {
 
 @media (min-width: 1024px) {
   .palette-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
@@ -104,6 +123,22 @@ fieldset label {
   .swatch--entering {
     animation-delay: 0s !important;
   }
+}
+
+@keyframes swatch-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+.swatch--exiting {
+  animation: swatch-exit var(--transition-base) ease-in both;
 }
 
 .swatch-color {
@@ -169,11 +204,15 @@ fieldset label {
 }
 
 .swatch-data dt {
-  opacity: 0.7;
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
 }
 
 .swatch-data dd {
   margin: 0;
+  font-weight: 600;
 }
 
 .archive {
@@ -199,7 +238,9 @@ fieldset label {
 
 .save-button,
 .batch-restore,
-.batch-delete {
+.batch-delete,
+.batch-confirm,
+.batch-cancel {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -213,7 +254,9 @@ fieldset label {
 
 .save-button:hover,
 .batch-restore:hover,
-.batch-delete:hover {
+.batch-delete:hover,
+.batch-confirm:hover,
+.batch-cancel:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
@@ -257,14 +300,17 @@ fieldset label {
   border-radius: 2px;
 }
 
-.batch-label {
+.batch-label,
+.batch-confirm-label {
   flex: 1;
   font-family: var(--font-mono);
   font-size: 0.8125rem;
 }
 
 .batch-restore,
-.batch-delete {
+.batch-delete,
+.batch-confirm,
+.batch-cancel {
   padding: var(--space-1) var(--space-2);
   font-family: var(--font-mono);
   font-size: 0.75rem;

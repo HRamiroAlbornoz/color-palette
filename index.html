@@ -11,6 +11,9 @@
   <body>
     <header>
       <p>Colorfly Studio</p>
+      <p class="header-meta">
+        Generación Nº<span id="generation-counter"></span> · <time id="header-clock"></time>
+      </p>
     </header>
     <main>
       <section class="controls" aria-label="Controles de generación">
@@ -51,6 +54,12 @@
         <ul class="archive-list" id="archive-list"></ul>
       </section>
     </main>
+    <footer>
+      <p>
+        Hernán Albornoz ·
+        <a href="https://github.com/HRamiroAlbornoz/color-palette">GitHub</a>
+      </p>
+    </footer>
     <p id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></p>
     <script type="module" src="js/main.js"></script>
   </body>

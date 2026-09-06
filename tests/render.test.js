@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { renderArchive, renderPalette } from '../js/render.js';
+import {
+  markExitingSwatches,
+  pickColumnCount,
+  renderArchive,
+  renderHeaderMeta,
+  renderPalette,
+} from '../js/render.js';
 
 describe('renderPalette', () => {
   let container;
@@ -236,21 +242,136 @@ describe('renderArchive', () => {
     const onRestore = vi.fn();
     const batches = [{ number: 5, date: new Date().toISOString(), colors: [] }];
 
-    renderArchive(container, { available: true, batches }, onRestore);
+    renderArchive(container, { available: true, batches }, { onRestore });
 
     container.querySelector('.batch-restore').click();
 
     expect(onRestore).toHaveBeenCalledWith(5);
   });
 
-  it('invokes the delete callback with the clicked batch number', () => {
-    const onDelete = vi.fn();
-    const batches = [{ number: 5, date: new Date().toISOString(), colors: [] }];
+  it('gives each restore/delete button an accessible name naming its own batch', () => {
+    const batches = [
+      { number: 5, date: new Date().toISOString(), colors: [] },
+      { number: 6, date: new Date().toISOString(), colors: [] },
+    ];
 
-    renderArchive(container, { available: true, batches }, () => {}, onDelete);
+    renderArchive(container, { available: true, batches });
 
-    container.querySelector('.batch-delete').click();
+    const restoreButtons = container.querySelectorAll('.batch-restore');
+    const deleteButtons = container.querySelectorAll('.batch-delete');
+    expect(restoreButtons[0].getAttribute('aria-label')).toBe('Restaurar lote Nº5');
+    expect(restoreButtons[1].getAttribute('aria-label')).toBe('Restaurar lote Nº6');
+    expect(deleteButtons[0].getAttribute('aria-label')).toBe('Borrar lote Nº5');
+    expect(deleteButtons[1].getAttribute('aria-label')).toBe('Borrar lote Nº6');
+  });
 
-    expect(onDelete).toHaveBeenCalledWith(5);
+  describe('delete confirmation', () => {
+    it('requests confirmation instead of deleting immediately when Borrar is clicked', () => {
+      const onRequestDelete = vi.fn();
+      const batches = [{ number: 5, date: new Date().toISOString(), colors: [] }];
+
+      renderArchive(container, { available: true, batches }, { onRequestDelete });
+
+      container.querySelector('.batch-delete').click();
+
+      expect(onRequestDelete).toHaveBeenCalledWith(5);
+    });
+
+    it('shows an in-place confirmation naming the batch when it matches confirmingNumber', () => {
+      const batches = [
+        { number: 5, date: '2026-09-05T12:00:00.000Z', colors: [] },
+        { number: 6, date: new Date().toISOString(), colors: [] },
+      ];
+
+      renderArchive(container, { available: true, batches }, { confirmingNumber: 5 });
+
+      const entries = container.querySelectorAll('.batch-entry');
+      expect(entries[0].textContent).toContain('¿Borrar el Lote Nº5');
+      expect(entries[0].querySelector('.batch-restore')).toBeNull();
+      expect(entries[1].querySelector('.batch-confirm')).toBeNull();
+    });
+
+    it('invokes onConfirmDelete with the batch number when Confirmar is clicked', () => {
+      const onConfirmDelete = vi.fn();
+      const batches = [{ number: 5, date: new Date().toISOString(), colors: [] }];
+
+      renderArchive(
+        container,
+        { available: true, batches },
+        { confirmingNumber: 5, onConfirmDelete },
+      );
+
+      container.querySelector('.batch-confirm').click();
+
+      expect(onConfirmDelete).toHaveBeenCalledWith(5);
+    });
+
+    it('invokes onCancelDelete when Cancelar is clicked', () => {
+      const onCancelDelete = vi.fn();
+      const batches = [{ number: 5, date: new Date().toISOString(), colors: [] }];
+
+      renderArchive(
+        container,
+        { available: true, batches },
+        { confirmingNumber: 5, onCancelDelete },
+      );
+
+      container.querySelector('.batch-cancel').click();
+
+      expect(onCancelDelete).toHaveBeenCalled();
+    });
+  });
+});
+
+describe('pickColumnCount', () => {
+  it('keeps the preferred column count when it does not orphan a single item', () => {
+    expect(pickColumnCount(3, 6)).toBe(3);
+    expect(pickColumnCount(3, 8)).toBe(3);
+    expect(pickColumnCount(3, 9)).toBe(3);
+    expect(pickColumnCount(5, 9)).toBe(5);
+  });
+
+  it('picks a smaller column count when it avoids stranding one item alone', () => {
+    expect(pickColumnCount(5, 6)).toBe(4);
+  });
+
+  it('picks a larger column count when going smaller is not possible', () => {
+    expect(pickColumnCount(2, 9)).toBe(3);
+  });
+});
+
+describe('markExitingSwatches', () => {
+  let container;
+
+  beforeEach(() => {
+    container = document.createElement('ul');
+    container.innerHTML =
+      '<li class="swatch"></li><li class="swatch"></li><li class="swatch"></li>';
+  });
+
+  it('marks only the swatches whose color is unlocked, and returns them', () => {
+    const colors = [{ locked: true }, { locked: false }, { locked: false }];
+
+    const exiting = markExitingSwatches(container, colors);
+
+    const swatches = container.querySelectorAll('.swatch');
+    expect(swatches[0].classList.contains('swatch--exiting')).toBe(false);
+    expect(swatches[1].classList.contains('swatch--exiting')).toBe(true);
+    expect(swatches[2].classList.contains('swatch--exiting')).toBe(true);
+    expect(exiting).toEqual([swatches[1], swatches[2]]);
+  });
+});
+
+describe('renderHeaderMeta', () => {
+  it('writes the count and a formatted time onto the given elements', () => {
+    const counterElement = document.createElement('span');
+    const clockElement = document.createElement('time');
+    const now = new Date('2026-09-05T21:05:00.000Z');
+
+    renderHeaderMeta(counterElement, clockElement, { count: 3, now });
+
+    expect(counterElement.textContent).toBe('3');
+    expect(clockElement.textContent).not.toBe('');
+    expect(clockElement.dateTime).toBe(now.toISOString());
   });
 });

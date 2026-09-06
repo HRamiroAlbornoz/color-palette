@@ -7,7 +7,15 @@ import {
   toggleLock,
   unlockAll,
 } from './palette.js';
-import { focusLockButton, formatBatchDate, renderArchive, renderPalette } from './render.js';
+import {
+  focusLockButton,
+  markExitingSwatches,
+  renderArchive,
+  renderHeaderMeta,
+  renderPalette,
+  updateGridColumns,
+  waitForSwatchesToExit,
+} from './render.js';
 import {
   MAX_BATCHES,
   addBatch,
@@ -19,6 +27,7 @@ import {
 import { createToast } from './toast.js';
 
 const ANIMATE_ENTRANCE = true;
+const CLOCK_UPDATE_INTERVAL_MS = 30000;
 
 const grid = document.querySelector('#palette-grid');
 const generateButton = document.querySelector('#generate-button');
@@ -26,15 +35,26 @@ const saveBatchButton = document.querySelector('#save-batch-button');
 const archiveList = document.querySelector('#archive-list');
 const sizeInputs = document.querySelectorAll('input[name="palette-size"]');
 const formatInputs = document.querySelectorAll('input[name="color-format"]');
+const generationCounterDisplay = document.querySelector('#generation-counter');
+const headerClock = document.querySelector('#header-clock');
 const toast = createToast(document.querySelector('#toast'));
 
 const initialSize = Number(document.querySelector('input[name="palette-size"]:checked').value);
 let colors = createPalette(initialSize);
 let format = document.querySelector('input[name="color-format"]:checked').value;
+let generationCount = 1;
 
 const initialArchive = loadArchive();
 const archiveAvailable = initialArchive.available;
 let batches = initialArchive.batches;
+let confirmingDeleteNumber = null;
+
+function updateHeaderMeta() {
+  renderHeaderMeta(generationCounterDisplay, headerClock, {
+    count: generationCount,
+    now: new Date(),
+  });
+}
 
 async function handleSwatchClick(code) {
   const result = await copyToClipboard(code);
@@ -72,27 +92,27 @@ function handleRestoreBatch(number) {
   renderPaletteGrid();
 }
 
-function handleDeleteBatch(number) {
-  const batch = findBatch(batches, number);
-  if (!batch) {
-    return;
-  }
+function handleRequestDelete(number) {
+  confirmingDeleteNumber = number;
+  renderArchiveList();
+}
 
-  const confirmed = window.confirm(
-    `¿Borrar el lote Nº${batch.number} guardado el ${formatBatchDate(batch.date)}?`,
-  );
-  if (!confirmed) {
-    return;
-  }
+function handleCancelDelete() {
+  confirmingDeleteNumber = null;
+  renderArchiveList();
+}
+
+function handleConfirmDelete(number) {
+  confirmingDeleteNumber = null;
 
   const updatedBatches = removeBatch(batches, number);
   const persisted = persistArchive(updatedBatches);
-  if (!persisted) {
+  if (persisted) {
+    batches = updatedBatches;
+  } else {
     toast.show('No se pudo borrar la paleta en este navegador.');
-    return;
   }
 
-  batches = updatedBatches;
   renderArchiveList();
 }
 
@@ -104,22 +124,39 @@ function renderArchiveList() {
   renderArchive(
     archiveList,
     { available: archiveAvailable, batches },
-    handleRestoreBatch,
-    handleDeleteBatch,
+    {
+      onRestore: handleRestoreBatch,
+      onRequestDelete: handleRequestDelete,
+      onConfirmDelete: handleConfirmDelete,
+      onCancelDelete: handleCancelDelete,
+      confirmingNumber: confirmingDeleteNumber,
+    },
   );
 }
 
 renderPaletteGrid();
 renderArchiveList();
+updateHeaderMeta();
+setInterval(updateHeaderMeta, CLOCK_UPDATE_INTERVAL_MS);
+window.addEventListener('resize', () => updateGridColumns(grid, colors.length));
 
-generateButton.addEventListener('click', () => {
+generateButton.addEventListener('click', async () => {
   if (isFullyLocked(colors)) {
     toast.show('Todos los colores están bloqueados: no hay nada para regenerar.');
     return;
   }
 
-  colors = regeneratePalette(colors);
-  renderPaletteGrid(ANIMATE_ENTRANCE);
+  generateButton.disabled = true;
+  try {
+    await waitForSwatchesToExit(markExitingSwatches(grid, colors));
+
+    colors = regeneratePalette(colors);
+    generationCount += 1;
+    updateHeaderMeta();
+    renderPaletteGrid(ANIMATE_ENTRANCE);
+  } finally {
+    generateButton.disabled = false;
+  }
 });
 
 saveBatchButton.addEventListener('click', () => {

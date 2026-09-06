@@ -15,20 +15,29 @@ function circularHueDistance(a, b) {
   return Math.min(diff, HUE_MAX - diff);
 }
 
+function minDistanceToExisting(hue, existingHues) {
+  return existingHues.length === 0
+    ? Infinity
+    : Math.min(...existingHues.map((existingHue) => circularHueDistance(hue, existingHue)));
+}
+
 export function createRandomHsl(existingHues = []) {
-  let hue = randomInRange(0, HUE_MAX);
+  let bestHue = randomInRange(0, HUE_MAX);
+  let bestDistance = minDistanceToExisting(bestHue, existingHues);
   let attempts = 0;
 
-  while (
-    attempts < MAX_HUE_ATTEMPTS &&
-    existingHues.some((existingHue) => circularHueDistance(hue, existingHue) < MIN_HUE_SEPARATION)
-  ) {
-    hue = randomInRange(0, HUE_MAX);
+  while (attempts < MAX_HUE_ATTEMPTS && bestDistance < MIN_HUE_SEPARATION) {
+    const candidateHue = randomInRange(0, HUE_MAX);
+    const candidateDistance = minDistanceToExisting(candidateHue, existingHues);
+    if (candidateDistance > bestDistance) {
+      bestHue = candidateHue;
+      bestDistance = candidateDistance;
+    }
     attempts += 1;
   }
 
   return {
-    hue: Math.round(hue),
+    hue: Math.round(bestHue),
     saturation: Math.round(randomInRange(SATURATION_MIN, SATURATION_MAX)),
     lightness: Math.round(randomInRange(LIGHTNESS_MIN, LIGHTNESS_MAX)),
   };
@@ -102,9 +111,10 @@ export function getContrastRatio(rgbA, rgbB) {
 }
 
 export function getReadableTextColor(rgb) {
-  const backgroundLuminance = getRelativeLuminance(rgb);
-  const contrastWithWhite = (1 + 0.05) / (backgroundLuminance + 0.05);
-  const contrastWithBlack = (backgroundLuminance + 0.05) / (0 + 0.05);
+  const white = { r: 255, g: 255, b: 255 };
+  const black = { r: 0, g: 0, b: 0 };
+  const contrastWithWhite = getContrastRatio(rgb, white);
+  const contrastWithBlack = getContrastRatio(rgb, black);
 
   return contrastWithWhite >= contrastWithBlack
     ? { hex: '#FFFFFF', contrastRatio: contrastWithWhite }

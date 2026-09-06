@@ -27,6 +27,16 @@ describe('renderPalette', () => {
     expect(colorButton.style.backgroundColor).toBe('rgb(74, 145, 217)');
   });
 
+  it('exposes the HSL/contrast data to assistive tech via aria-describedby, since aria-label hides it', () => {
+    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57, locked: false }], 'hex');
+
+    const colorButton = container.querySelector('.swatch-color');
+    const describedById = colorButton.getAttribute('aria-describedby');
+    const describedByElement = container.querySelector(`#${describedById}`);
+
+    expect(describedByElement).toBe(container.querySelector('.swatch-data'));
+  });
+
   it('shows the HSL triplet and a contrast ratio', () => {
     renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57, locked: false }], 'hex');
 

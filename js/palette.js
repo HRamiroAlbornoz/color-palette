@@ -10,19 +10,22 @@ function createUnlockedColor(existingHues) {
   return { ...createRandomHsl(existingHues), locked: false };
 }
 
+function generateNonClashingColors(count, anchorHues) {
+  const usedHues = [...anchorHues];
+  return Array.from({ length: count }, () => {
+    const newColor = createUnlockedColor(usedHues);
+    usedHues.push(newColor.hue);
+    return newColor;
+  });
+}
+
 export function resizePalette(colors, newSize) {
   if (newSize <= colors.length) {
     return colors.slice(0, newSize);
   }
 
-  const resized = [...colors];
-  const usedHues = resized.map((color) => color.hue);
-  while (resized.length < newSize) {
-    const newColor = createUnlockedColor(usedHues);
-    usedHues.push(newColor.hue);
-    resized.push(newColor);
-  }
-  return resized;
+  const anchorHues = colors.map((color) => color.hue);
+  return [...colors, ...generateNonClashingColors(newSize - colors.length, anchorHues)];
 }
 
 export function toggleLock(colors, index) {
@@ -38,19 +41,15 @@ export function unlockAll(colors) {
 }
 
 export function regeneratePalette(colors) {
-  const usedHues = colors.filter((color) => color.locked).map((color) => color.hue);
-  const regenerated = [];
+  const lockedHues = colors.filter((color) => color.locked).map((color) => color.hue);
+  const unlockedCount = colors.filter((color) => !color.locked).length;
+  const replacements = generateNonClashingColors(unlockedCount, lockedHues);
 
-  for (const color of colors) {
+  let nextReplacementIndex = 0;
+  return colors.map((color) => {
     if (color.locked) {
-      regenerated.push(color);
-      continue;
+      return color;
     }
-
-    const newColor = createUnlockedColor(usedHues);
-    usedHues.push(newColor.hue);
-    regenerated.push(newColor);
-  }
-
-  return regenerated;
+    return replacements[nextReplacementIndex++];
+  });
 }

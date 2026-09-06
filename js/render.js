@@ -93,7 +93,7 @@ export function pickColumnCount(preferred, itemCount) {
   return preferred;
 }
 
-function updateGridColumnOverride(container, itemCount) {
+export function updateGridColumns(container, itemCount) {
   container.style.removeProperty('grid-template-columns');
   const preferred = getComputedStyle(container)
     .gridTemplateColumns.split(' ')
@@ -104,10 +104,6 @@ function updateGridColumnOverride(container, itemCount) {
   }
 }
 
-export function updateGridColumns(container, itemCount) {
-  updateGridColumnOverride(container, itemCount);
-}
-
 export function renderPalette(
   container,
   colors,
@@ -116,7 +112,7 @@ export function renderPalette(
   onLockToggle = () => {},
   animateEntrance = false,
 ) {
-  updateGridColumnOverride(container, colors.length);
+  updateGridColumns(container, colors.length);
   container.replaceChildren(
     ...colors.map((color, index) => {
       const swatch = createSwatchElement(color, format, onSwatchClick, () => onLockToggle(index));
@@ -133,20 +129,22 @@ export function focusLockButton(container, index) {
   container.querySelectorAll('.lock-button')[index]?.focus();
 }
 
+export function focusBatchButton(container, selector) {
+  container.querySelector(selector)?.focus();
+}
+
 function getExitAnimationDuration() {
   const value = getComputedStyle(document.documentElement).getPropertyValue('--transition-base');
   return parseFloat(value) || 0;
 }
 
-const EXIT_DURATION_MS = getExitAnimationDuration();
-
-function waitForSwatchExit(swatch) {
-  if (EXIT_DURATION_MS === 0) {
+function waitForSwatchExit(swatch, durationMs) {
+  if (durationMs === 0) {
     return Promise.resolve();
   }
 
   return new Promise((resolve) => {
-    const timeoutId = setTimeout(resolve, EXIT_DURATION_MS);
+    const timeoutId = setTimeout(resolve, durationMs);
     swatch.addEventListener(
       'animationend',
       () => {
@@ -170,7 +168,8 @@ export function markExitingSwatches(container, colors) {
 }
 
 export function waitForSwatchesToExit(swatches) {
-  return Promise.all(swatches.map(waitForSwatchExit));
+  const durationMs = getExitAnimationDuration();
+  return Promise.all(swatches.map((swatch) => waitForSwatchExit(swatch, durationMs)));
 }
 
 export function renderHeaderMeta(counterElement, clockElement, { count, now }) {
@@ -223,12 +222,14 @@ function createDeleteConfirmEntry(batch, { onConfirmDelete, onCancelDelete }) {
   confirmButton.type = 'button';
   confirmButton.className = 'batch-confirm';
   confirmButton.textContent = 'Confirmar';
+  confirmButton.setAttribute('aria-label', `Confirmar borrado del lote Nº${batch.number}`);
   confirmButton.addEventListener('click', () => onConfirmDelete(batch.number));
 
   const cancelButton = document.createElement('button');
   cancelButton.type = 'button';
   cancelButton.className = 'batch-cancel';
   cancelButton.textContent = 'Cancelar';
+  cancelButton.setAttribute('aria-label', `Cancelar borrado del lote Nº${batch.number}`);
   cancelButton.addEventListener('click', () => onCancelDelete());
 
   entry.append(createBatchThumbnails(batch), confirmLabel, confirmButton, cancelButton);

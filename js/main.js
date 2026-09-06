@@ -8,6 +8,7 @@ import {
   unlockAll,
 } from './palette.js';
 import {
+  focusBatchButton,
   focusLockButton,
   markExitingSwatches,
   renderArchive,
@@ -28,6 +29,7 @@ import { createToast } from './toast.js';
 
 const ANIMATE_ENTRANCE = true;
 const CLOCK_UPDATE_INTERVAL_MS = 30000;
+const RESIZE_DEBOUNCE_MS = 150;
 
 const grid = document.querySelector('#palette-grid');
 const generateButton = document.querySelector('#generate-button');
@@ -48,6 +50,17 @@ const initialArchive = loadArchive();
 const archiveAvailable = initialArchive.available;
 let batches = initialArchive.batches;
 let confirmingDeleteNumber = null;
+let isGenerating = false;
+
+function setControlsDisabled(disabled) {
+  generateButton.disabled = disabled;
+  sizeInputs.forEach((input) => {
+    input.disabled = disabled;
+  });
+  formatInputs.forEach((input) => {
+    input.disabled = disabled;
+  });
+}
 
 function updateHeaderMeta() {
   renderHeaderMeta(generationCounterDisplay, headerClock, {
@@ -69,12 +82,20 @@ async function handleSwatchClick(code) {
 }
 
 function handleLockToggle(index) {
+  if (isGenerating) {
+    return;
+  }
+
   colors = toggleLock(colors, index);
   renderPaletteGrid();
   focusLockButton(grid, index);
 }
 
 function handleRestoreBatch(number) {
+  if (isGenerating) {
+    return;
+  }
+
   const batch = findBatch(batches, number);
   if (!batch) {
     return;
@@ -95,11 +116,14 @@ function handleRestoreBatch(number) {
 function handleRequestDelete(number) {
   confirmingDeleteNumber = number;
   renderArchiveList();
+  focusBatchButton(archiveList, '.batch-confirm');
 }
 
 function handleCancelDelete() {
+  const cancelledNumber = confirmingDeleteNumber;
   confirmingDeleteNumber = null;
   renderArchiveList();
+  focusBatchButton(archiveList, `[aria-label="Borrar lote Nº${cancelledNumber}"]`);
 }
 
 function handleConfirmDelete(number) {
@@ -114,6 +138,7 @@ function handleConfirmDelete(number) {
   }
 
   renderArchiveList();
+  saveBatchButton.focus();
 }
 
 function renderPaletteGrid(animateEntrance = false) {
@@ -138,7 +163,11 @@ renderPaletteGrid();
 renderArchiveList();
 updateHeaderMeta();
 setInterval(updateHeaderMeta, CLOCK_UPDATE_INTERVAL_MS);
-window.addEventListener('resize', () => updateGridColumns(grid, colors.length));
+let resizeTimeoutId;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeoutId);
+  resizeTimeoutId = setTimeout(() => updateGridColumns(grid, colors.length), RESIZE_DEBOUNCE_MS);
+});
 
 generateButton.addEventListener('click', async () => {
   if (isFullyLocked(colors)) {
@@ -146,7 +175,8 @@ generateButton.addEventListener('click', async () => {
     return;
   }
 
-  generateButton.disabled = true;
+  isGenerating = true;
+  setControlsDisabled(true);
   try {
     await waitForSwatchesToExit(markExitingSwatches(grid, colors));
 
@@ -155,7 +185,8 @@ generateButton.addEventListener('click', async () => {
     updateHeaderMeta();
     renderPaletteGrid(ANIMATE_ENTRANCE);
   } finally {
-    generateButton.disabled = false;
+    isGenerating = false;
+    setControlsDisabled(false);
   }
 });
 

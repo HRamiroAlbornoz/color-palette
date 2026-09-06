@@ -1,10 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  focusBatchButton,
   markExitingSwatches,
   pickColumnCount,
   renderArchive,
   renderHeaderMeta,
   renderPalette,
+  updateGridColumns,
+  waitForSwatchesToExit,
 } from '../js/render.js';
 
 describe('renderPalette', () => {
@@ -320,6 +323,19 @@ describe('renderArchive', () => {
 
       expect(onCancelDelete).toHaveBeenCalled();
     });
+
+    it('gives Confirmar/Cancelar an accessible name naming the batch being deleted', () => {
+      const batches = [{ number: 5, date: new Date().toISOString(), colors: [] }];
+
+      renderArchive(container, { available: true, batches }, { confirmingNumber: 5 });
+
+      expect(container.querySelector('.batch-confirm').getAttribute('aria-label')).toBe(
+        'Confirmar borrado del lote Nº5',
+      );
+      expect(container.querySelector('.batch-cancel').getAttribute('aria-label')).toBe(
+        'Cancelar borrado del lote Nº5',
+      );
+    });
   });
 });
 
@@ -373,5 +389,80 @@ describe('renderHeaderMeta', () => {
     expect(counterElement.textContent).toBe('3');
     expect(clockElement.textContent).not.toBe('');
     expect(clockElement.dateTime).toBe(now.toISOString());
+  });
+});
+
+describe('focusBatchButton', () => {
+  it('focuses the element matching the selector, if it exists', () => {
+    const container = document.createElement('ul');
+    container.innerHTML = '<button class="batch-confirm">Confirmar</button>';
+    document.body.append(container);
+
+    focusBatchButton(container, '.batch-confirm');
+
+    expect(document.activeElement).toBe(container.querySelector('.batch-confirm'));
+    container.remove();
+  });
+
+  it('does nothing when no element matches the selector', () => {
+    const container = document.createElement('ul');
+
+    expect(() => focusBatchButton(container, '.batch-confirm')).not.toThrow();
+  });
+});
+
+describe('updateGridColumns', () => {
+  let container;
+  let getComputedStyleSpy;
+
+  beforeEach(() => {
+    container = document.createElement('ul');
+    getComputedStyleSpy = vi
+      .spyOn(window, 'getComputedStyle')
+      .mockReturnValue({ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr' });
+  });
+
+  afterEach(() => {
+    getComputedStyleSpy.mockRestore();
+  });
+
+  it('overrides the column count when it would strand a single item', () => {
+    updateGridColumns(container, 6);
+
+    expect(container.style.gridTemplateColumns).toBe('repeat(4, 1fr)');
+  });
+
+  it('leaves the CSS-driven column count untouched when nothing would be stranded', () => {
+    updateGridColumns(container, 8);
+
+    expect(container.style.gridTemplateColumns).toBe('');
+  });
+});
+
+describe('waitForSwatchesToExit', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('resolves as soon as every swatch fires animationend', async () => {
+    const swatches = [document.createElement('li'), document.createElement('li')];
+    document.documentElement.style.setProperty('--transition-base', '200ms');
+
+    const donePromise = waitForSwatchesToExit(swatches);
+    swatches.forEach((swatch) => swatch.dispatchEvent(new Event('animationend')));
+
+    await expect(donePromise).resolves.toEqual([undefined, undefined]);
+    document.documentElement.style.removeProperty('--transition-base');
+  });
+
+  it('falls back to a timeout if animationend never fires', async () => {
+    vi.useFakeTimers();
+    document.documentElement.style.setProperty('--transition-base', '200ms');
+
+    const donePromise = waitForSwatchesToExit([document.createElement('li')]);
+    vi.advanceTimersByTime(200);
+
+    await expect(donePromise).resolves.toEqual([undefined]);
+    document.documentElement.style.removeProperty('--transition-base');
   });
 });

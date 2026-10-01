@@ -20,26 +20,37 @@ real está en fijar lo que sirve y volver a tirar sobre el resto hasta converger
 
 Todo el contenido es generado en el cliente: no hay copy de marketing, no hay imágenes, no hay datos
 externos. Restricciones vinculantes: WCAG AA, teclado completo con foco visible, mobile-first
-320/768/1024, ambos temas por `prefers-color-scheme`, `prefers-reduced-motion`, y CSS plano con
-custom properties (sin build step, sin Tailwind, sin preprocesadores).
+320/768/1024, tema claro y oscuro (por defecto según `prefers-color-scheme`, con selector manual
+desde el release 2), `prefers-reduced-motion`, y CSS plano con custom properties (sin build step,
+sin Tailwind, sin preprocesadores).
 
 ## Direction contract
 
-THESIS: Cada paleta es un lote de tinte, no una fila de franjas; rechaza la columna a sangre de la
-categoría.
+Release 2 · reemplaza la dirección «Carta de Lote» del release 1. Elegida por el autor entre tres
+propuestas (Instrumento, Muestrario, Estudio) el 2026-10-01.
 
-OWN-WORLD: Fondo neutro frío, tinta casi negra, filete gris de 1px y un único violeta de sello. Mono
-para todo dato, sans solo para chrome. Sin sombras, degradados ni radios mayores a 4px. El color
-generado es lo único saturado en pantalla.
+THESIS: La pantalla es un espacio de trabajo, no una página: la paleta es el objeto sobre la mesa y
+todo lo demás son herramientas alrededor.
 
-STORY: El diseñador entiende que la pantalla es una carta de lote, cree que puede fijar lo que sirve
-y volver a teñir el resto, y se lleva el código copiado.
+OWN-WORLD: Barra lateral siempre oscura (grafito #17181B en el tema claro, #0A0B0C en el oscuro,
+separada del área de trabajo por un filete), área de trabajo neutra clara (#F7F7F6) u oscura
+(#111214) según el tema. Geist para la interfaz, Geist Mono para todo dato y
+código, ambas autoalojadas. Un único acento azul (#2F5FD0) reservado a «Generar paleta». Filetes de
+1px, radios de 4px o menos, sin sombras ni degradados. El color generado es lo único saturado en
+pantalla.
 
-FIRST VIEWPORT: Cabecera reglada con número de lote y hora. Controles: «Generar paleta» en violeta
-como única acción primaria, tamaño y formato como grupos de radios. Rejilla de muestras (2/3/5
-columnas) con candado sobre el color y HEX, H/S/L y contraste al pie. Archivo de lotes abajo.
+STORY: El diseñador entiende que está en su mesa de trabajo, genera y fija colores hasta que la
+banda cierra, verifica el contraste en el panel y se lleva la paleta copiada, color por color o
+entera como variables CSS.
 
-FORM: Carta de Lote, candidata 7 de 7 de la lista ordenada; semilla 8845c37e.
+FIRST VIEWPORT: Desde 1024px, barra lateral con marca, «Generar paleta» (con el atajo «Espacio»
+dentro del botón en dispositivos con mouse o trackpad), tamaño y formato como controles segmentados, archivo de lotes como tiras de
+color y el crédito del autor al pie. A la derecha, cabecera con «Generación Nº», conteo, hora y
+selector de tema; la paleta como banda continua con candado
+arriba y código, H/S/L y contraste al pie; debajo, panel de contraste y bloque de variables CSS.
+Por debajo de 1024px, todo apilado en una columna.
+
+FORM: Estudio (propuesta C del lienzo de diseño del release 2).
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the
 verdict, DESIGN.md, and every shipping raster carrying its provenance.
@@ -59,12 +70,12 @@ Cada línea nombra al retador que la donó. La donación transfiere disciplina d
 
 ## Signature interaction
 
-Regenerar. Las muestras no bloqueadas se retiran de la carta y las nuevas se depositan escalonadas,
+Regenerar. Las muestras no bloqueadas se retiran de la banda y las nuevas se depositan escalonadas,
 en una sola coreografía; las bloqueadas no se mueven en ningún momento, y esa inmovilidad es la
 prueba visible de que el bloqueo funcionó. Bajo `prefers-reduced-motion` el reemplazo es inmediato y
 el estado sigue siendo legible sin el movimiento.
 
 ## Unresolved
 
-- El ratio de contraste por muestra está aprobado como dato visible, pendiente de confirmar contra
-  qué fondo se calcula (decisión de implementación, no de dirección).
+- Ninguno. El ratio de contraste se calcula entre el color generado y el texto que la muestra elige
+  escribir encima (resuelto en el release 1, F2.6).

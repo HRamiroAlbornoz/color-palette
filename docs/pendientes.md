@@ -4,6 +4,22 @@ Deuda detectada en el Cierre del release 1. Ninguno de estos hallazgos bloqueó 
 clasificaron como deuda porque son mejoras de mantenibilidad de bajo riesgo, no bugs de
 comportamiento ni brechas de la spec.
 
+**Release 2 (2026-10-01): todas las entradas entran en el alcance.** El rediseño «Estudio» reescribe
+las muestras, así que el candado (F4.3), el `<dl>` dentro del `<button>` y los tamaños en el HTML
+(restricciones de implementación 1 y 2 de la spec) quedan escritos en la spec; la fábrica de botones y los dos helpers se hacen en
+la misma reescritura. Cada entrada se borra de este archivo cuando su slice cierra.
+
+## `DESIGN.md` nunca se generó
+
+- **Dónde apareció:** planificación del release 2 (cuarta revisión del plan)
+- **Qué pasa:** el contrato de dirección (`FINISH`) dice que el trabajo de diseño termina con la
+  revisión final, el veredicto y `DESIGN.md`, y `CLAUDE.md` aclara que en Impeccable 4.x ese archivo
+  lo escribe el documenter al final, desde lo construido. El release 1 cerró sin ejecutar ese paso.
+- **Por qué no se arregló:** no se detectó en el Cierre del release 1; el flujo de Hernán no tiene
+  un paso explícito para el documenter.
+- **Qué habría que hacer:** en el Cierre del release 2, después de `impeccable critique`, correr el
+  documenter de Impeccable para que escriba `DESIGN.md` desde la interfaz «Estudio» terminada.
+
 ## El candado distingue bloqueado/desbloqueado por relleno, no por una silueta distinta
 
 - **Dónde apareció:** release 1, revisión de Cierre (`mattpocock-skills:code-review`, eje Spec)

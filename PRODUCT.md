@@ -68,6 +68,9 @@ Confirmado:
 - Copiar el código al portapapeles haciendo clic sobre el color, con confirmación visible.
 - Bloquear colores individualmente: al regenerar, los bloqueados se conservan.
 - Guardar paletas en el navegador, con un tope de 12, y poder restaurarlas o borrarlas.
+- Desde el release 2: ver el contraste de toda la paleta en un panel (nota AA/AAA), copiar la
+  paleta entera como variables CSS, generar con la tecla Espacio, y elegir el tema (sistema, claro u
+  oscuro).
 
 Restricciones técnicas:
 
@@ -83,7 +86,8 @@ Fuera de alcance, decidido explícitamente: exportar a PNG o ASE, modos de armon
 
 ## Brand Commitments
 
-- La aplicación se presenta como herramienta de **Colorfly Studio**. El nombre aparece en el header.
+- La aplicación se presenta como herramienta de **Colorfly Studio**. El nombre aparece arriba de
+  todo: en la barra lateral desde 1024px, en la cabecera por debajo de ese ancho.
 - El tono es el de una herramienta profesional interna, no el de una web de producto: enunciativo,
   breve, sin entusiasmo publicitario ni signos de exclamación.
 - Footer con atribución del autor, **Hernán Albornoz**, y link al repositorio en GitHub.
@@ -118,7 +122,8 @@ Requisito del proyecto: **WCAG 2.1 nivel AA**.
 - Contraste suficiente en todo texto, incluido el que se superpone a un color generado al azar (el
   color de ese texto se calcula según la luminancia del fondo, no se fija a mano).
 - Navegación completa por teclado con foco visible; ningún control accesible solo por hover.
-- Controles agrupados y etiquetados: los selectores de tamaño y formato son grupos de radios con su
-  etiqueta, no botones sueltos.
+- Controles agrupados y etiquetados: los selectores de tamaño, formato y tema son grupos de radios
+  con su etiqueta, no botones sueltos.
 - La confirmación de copiado se anuncia a lectores de pantalla, no solo visualmente.
-- Se respetan `prefers-color-scheme` (tema claro y oscuro) y `prefers-reduced-motion`.
+- El tema sigue `prefers-color-scheme` por defecto y se puede forzar a claro u oscuro; se respeta
+  `prefers-reduced-motion`.

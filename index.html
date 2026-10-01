@@ -4,62 +4,56 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Generador de Paletas · Colorfly Studio</title>
+    <link rel="preload" href="fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link
+      rel="preload"
+      href="fonts/GeistMono-Variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link rel="stylesheet" href="css/tokens.css" />
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/components.css" />
   </head>
   <body>
-    <header>
-      <p>Colorfly Studio</p>
-      <p class="header-meta">
-        Generación Nº<span id="generation-counter"></span> · <time id="header-clock"></time>
-      </p>
-    </header>
-    <main>
-      <section class="controls" aria-label="Controles de generación">
+    <a class="skip-link" href="#palette-grid" id="skip-link">Saltar a la paleta</a>
+    <div class="app">
+      <p class="brand sidebar-region">Colorfly Studio</p>
+      <header class="topbar">
+        <h1 class="generation-title">Generación Nº<span id="generation-counter"></span></h1>
+        <p class="topbar-meta">
+          <span id="palette-summary"></span> · <time id="topbar-clock"></time>
+        </p>
+      </header>
+      <section class="controls sidebar-region" aria-label="Controles de generación">
         <button type="button" id="generate-button" class="generate-button">Generar paleta</button>
-        <fieldset>
+        <fieldset class="segmented" id="size-fieldset">
           <legend>Tamaño</legend>
-          <label>
-            <input type="radio" name="palette-size" value="6" checked />
-            6
-          </label>
-          <label>
-            <input type="radio" name="palette-size" value="8" />
-            8
-          </label>
-          <label>
-            <input type="radio" name="palette-size" value="9" />
-            9
-          </label>
+          <div class="segmented-options" id="size-options"></div>
         </fieldset>
-        <fieldset>
+        <fieldset class="segmented" id="format-fieldset">
           <legend>Formato</legend>
-          <label>
-            <input type="radio" name="color-format" value="hex" checked />
-            HEX
-          </label>
-          <label>
-            <input type="radio" name="color-format" value="hsl" />
-            HSL
-          </label>
+          <div class="segmented-options" id="format-options"></div>
         </fieldset>
       </section>
-      <ul class="palette-grid" id="palette-grid" role="list" aria-label="Paleta generada"></ul>
-      <section class="archive" aria-label="Archivo de paletas guardadas">
+      <main class="workspace">
+        <ul class="palette-grid" id="palette-grid" role="list" aria-label="Paleta generada"></ul>
+      </main>
+      <section class="archive sidebar-region" aria-label="Archivo de paletas guardadas">
         <div class="archive-header">
           <h2>Archivo</h2>
           <button type="button" id="save-batch-button" class="save-button">Guardar lote</button>
         </div>
         <ul class="archive-list" id="archive-list"></ul>
       </section>
-    </main>
-    <footer>
-      <p>
-        Hernán Albornoz ·
-        <a href="https://github.com/HRamiroAlbornoz/color-palette">GitHub</a>
-      </p>
-    </footer>
+      <footer class="credit sidebar-region">
+        <p>
+          Hernán Albornoz ·
+          <a href="https://github.com/HRamiroAlbornoz/color-palette">GitHub</a>
+        </p>
+      </footer>
+    </div>
     <p id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></p>
     <script type="module" src="js/main.js"></script>
   </body>

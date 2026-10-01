@@ -1,11 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  describePalette,
   focusBatchButton,
+  focusFirstSwatch,
   markExitingSwatches,
   pickColumnCount,
   renderArchive,
-  renderHeaderMeta,
   renderPalette,
+  renderRadioOptions,
+  renderTopbarMeta,
   updateGridColumns,
   waitForSwatchesToExit,
 } from '../js/render.js';
@@ -378,17 +381,98 @@ describe('markExitingSwatches', () => {
   });
 });
 
-describe('renderHeaderMeta', () => {
+describe('renderTopbarMeta', () => {
   it('writes the count and a formatted time onto the given elements', () => {
     const counterElement = document.createElement('span');
     const clockElement = document.createElement('time');
     const now = new Date('2026-09-05T21:05:00.000Z');
 
-    renderHeaderMeta(counterElement, clockElement, { count: 3, now });
+    renderTopbarMeta(counterElement, clockElement, { count: 3, now });
 
     expect(counterElement.textContent).toBe('3');
     expect(clockElement.textContent).not.toBe('');
     expect(clockElement.dateTime).toBe(now.toISOString());
+  });
+});
+
+describe('renderRadioOptions', () => {
+  const options = [
+    { value: 'hex', label: 'HEX' },
+    { value: 'hsl', label: 'HSL' },
+  ];
+
+  it('renders one radio per option, sharing a name, with only the selected one checked', () => {
+    const container = document.createElement('div');
+
+    renderRadioOptions(container, { name: 'color-format', options, selected: 'hsl' });
+
+    const inputs = container.querySelectorAll('input[type="radio"]');
+    expect(Array.from(inputs, (input) => input.value)).toEqual(['hex', 'hsl']);
+    expect(Array.from(inputs, (input) => input.name)).toEqual(['color-format', 'color-format']);
+    expect(Array.from(inputs, (input) => input.checked)).toEqual([false, true]);
+  });
+
+  it('wraps each radio in a label that shows its option as visible text', () => {
+    const container = document.createElement('div');
+
+    renderRadioOptions(container, { name: 'color-format', options, selected: 'hex' });
+
+    const labels = container.querySelectorAll('label');
+    expect(Array.from(labels, (label) => label.textContent)).toEqual(['HEX', 'HSL']);
+  });
+
+  it('calls onChange with the value of the option the user picks', () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+    const onChange = vi.fn();
+    renderRadioOptions(container, { name: 'color-format', options, selected: 'hex', onChange });
+
+    container.querySelectorAll('input')[1].click();
+
+    expect(onChange).toHaveBeenCalledWith('hsl');
+    container.remove();
+  });
+
+  it('replaces the previous options when rendered again with another selection', () => {
+    const container = document.createElement('div');
+    renderRadioOptions(container, { name: 'color-format', options, selected: 'hex' });
+
+    renderRadioOptions(container, { name: 'color-format', options, selected: 'hsl' });
+
+    expect(container.querySelectorAll('input')).toHaveLength(2);
+    expect(container.querySelectorAll('input')[1].checked).toBe(true);
+  });
+});
+
+describe('describePalette', () => {
+  it('counts colors and locked colors', () => {
+    const colors = [{ locked: true }, { locked: false }, { locked: true }];
+
+    expect(describePalette(colors)).toBe('3 colores · 2 bloqueados');
+  });
+
+  it('uses the singular for exactly one locked color', () => {
+    expect(describePalette([{ locked: true }, { locked: false }])).toBe('2 colores · 1 bloqueado');
+  });
+});
+
+describe('focusFirstSwatch', () => {
+  it('moves focus to the copy button of the first swatch', () => {
+    const container = document.createElement('ul');
+    document.body.append(container);
+    renderPalette(
+      container,
+      [
+        { hue: 210, saturation: 65, lightness: 57, locked: false },
+        { hue: 30, saturation: 60, lightness: 50, locked: false },
+      ],
+      'hex',
+    );
+
+    focusFirstSwatch(container);
+
+    expect(document.activeElement).toBe(container.querySelector('.swatch-color'));
+    container.remove();
   });
 });
 

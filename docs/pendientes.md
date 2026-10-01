@@ -48,14 +48,6 @@ la misma reescritura. Cada entrada se borra de este archivo cuando su slice cier
 - **Qué habría que hacer:** extraer un `createButton(className, { text, onClick })` en `render.js`
   y usarlo en los cuatro sitios.
 
-## Lectura de radio "checked" duplicada en `main.js`
-
-- **Dónde apareció:** release 1, revisión de Cierre (`/code-review`)
-- **Qué pasa:** `document.querySelector('input[name="palette-size"]:checked').value` y el
-  equivalente para `color-format` repiten el mismo patrón de lectura sin un helper compartido.
-- **Por qué no se arregló:** mismo motivo que el anterior.
-- **Qué habría que hacer:** un `getCheckedValue(name)` en `main.js`.
-
 ## Ternario `format === 'hsl'` duplicado entre `color.js` y `render.js`
 
 - **Dónde apareció:** release 1, revisión de Cierre (`/code-review`)
@@ -82,17 +74,3 @@ la misma reescritura. Cada entrada se borra de este archivo cuando su slice cier
 - **Qué habría que hacer:** mover `codeDisplay` y `dataList` a hermanos del botón dentro de
   `<li class="swatch">`, y lograr la superposición visual sobre el color con `position: absolute`
   en vez de con anidamiento en el DOM.
-
-## `index.html` hardcodea los tamaños 6/8/9 sin una única fuente de verdad con `PALETTE_SIZES`
-
-- **Dónde apareció:** release 1, revisión de Cierre (`/code-review`, eje cross-file)
-- **Qué pasa:** los `<input type="radio">` de tamaño están escritos a mano en `index.html`, mientras
-  que `js/palette.js` exporta `PALETTE_SIZES = [6, 8, 9]` y `js/storage.js` valida los lotes
-  guardados contra esa misma constante. Si `PALETTE_SIZES` cambia sin tocar el HTML (o viceversa),
-  no hay ningún mecanismo que lo detecte.
-- **Por qué no se arregló:** sin build step, generar los radios desde `PALETTE_SIZES` en tiempo de
-  carga es posible pero agrega una responsabilidad nueva a `main.js` (armar HTML dinámicamente) que
-  hoy no existe en ningún otro control; no se justifica para tres valores que no cambiaron en todo
-  el release.
-- **Qué habría que hacer:** si `PALETTE_SIZES` llega a cambiar alguna vez, generar los `<input>` de
-  tamaño dinámicamente desde esa constante en `main.js`, en el mismo commit que el cambio.

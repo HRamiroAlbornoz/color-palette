@@ -23,4 +23,19 @@ describe('index.html', () => {
     expect(indexHtml).toMatch(/href="css\/tokens\.css"/);
     expect(indexHtml).toMatch(/href="css\/base\.css"/);
   });
+
+  it('preloads the self-hosted fonts from the same origin', () => {
+    expect(indexHtml).toMatch(/rel="preload"\s+href="fonts\/Geist-Variable\.woff2"/);
+    expect(indexHtml).toMatch(/rel="preload"\s+href="fonts\/GeistMono-Variable\.woff2"/);
+  });
+
+  it('loads nothing from another domain; the only external URL is the GitHub credit link', () => {
+    const externalUrls = indexHtml.match(/(?:src|href)="https?:\/\/[^"]+"/g) ?? [];
+
+    expect(externalUrls).toEqual(['href="https://github.com/HRamiroAlbornoz/color-palette"']);
+  });
+
+  it('does not hardcode any radio; size options come from PALETTE_SIZES via renderRadioOptions', () => {
+    expect(indexHtml).not.toMatch(/type="radio"/);
+  });
 });

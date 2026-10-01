@@ -129,6 +129,34 @@ export function focusLockButton(container, index) {
   container.querySelectorAll('.lock-button')[index]?.focus();
 }
 
+export function focusFirstSwatch(container) {
+  container.querySelector('.swatch-color')?.focus();
+}
+
+export function renderRadioOptions(container, { name, options, selected, onChange = () => {} }) {
+  container.replaceChildren(
+    ...options.map(({ value, label }) => {
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = name;
+      input.value = value;
+      input.className = 'visually-hidden';
+      input.checked = value === selected;
+      input.addEventListener('change', () => onChange(value));
+
+      const labelElement = document.createElement('label');
+      labelElement.append(input, label);
+      return labelElement;
+    }),
+  );
+}
+
+export function describePalette(colors) {
+  const lockedCount = colors.filter((color) => color.locked).length;
+  const lockedText = lockedCount === 1 ? '1 bloqueado' : `${lockedCount} bloqueados`;
+  return `${colors.length} colores · ${lockedText}`;
+}
+
 export function focusBatchButton(container, selector) {
   container.querySelector(selector)?.focus();
 }
@@ -172,7 +200,7 @@ export function waitForSwatchesToExit(swatches) {
   return Promise.all(swatches.map((swatch) => waitForSwatchExit(swatch, durationMs)));
 }
 
-export function renderHeaderMeta(counterElement, clockElement, { count, now }) {
+export function renderTopbarMeta(counterElement, clockElement, { count, now }) {
   counterElement.textContent = String(count);
   clockElement.textContent = now.toLocaleTimeString(APP_LOCALE, {
     hour: '2-digit',

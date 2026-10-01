@@ -18,7 +18,6 @@ import {
   renderPalette,
   renderRadioOptions,
   renderTopbarMeta,
-  updateGridColumns,
   waitForSwatchesToExit,
 } from './render.js';
 import {
@@ -33,7 +32,6 @@ import { createToast } from './toast.js';
 
 const ANIMATE_ENTRANCE = true;
 const CLOCK_UPDATE_INTERVAL_MS = 30000;
-const RESIZE_DEBOUNCE_MS = 150;
 
 const SIZE_OPTIONS = PALETTE_SIZES.map((size) => ({ value: String(size), label: String(size) }));
 const FORMAT_OPTIONS = [
@@ -200,12 +198,6 @@ setInterval(updateTopbarMeta, CLOCK_UPDATE_INTERVAL_MS);
 skipLink.addEventListener('click', (event) => {
   event.preventDefault();
   focusFirstSwatch(grid);
-});
-
-let resizeTimeoutId;
-window.addEventListener('resize', () => {
-  clearTimeout(resizeTimeoutId);
-  resizeTimeoutId = setTimeout(() => updateGridColumns(grid, colors.length), RESIZE_DEBOUNCE_MS);
 });
 
 generateButton.addEventListener('click', async () => {

@@ -4,12 +4,10 @@ import {
   focusBatchButton,
   focusFirstSwatch,
   markExitingSwatches,
-  pickColumnCount,
   renderArchive,
   renderPalette,
   renderRadioOptions,
   renderTopbarMeta,
-  updateGridColumns,
   waitForSwatchesToExit,
 } from '../js/render.js';
 
@@ -34,9 +32,26 @@ describe('renderPalette', () => {
   it('shows the exact HEX code matching the swatch background color', () => {
     renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57, locked: false }], 'hex');
 
+    const swatch = container.firstElementChild;
+    expect(swatch.querySelector('.swatch-code').textContent).toBe('#4A91D9');
+    expect(swatch.style.backgroundColor).toBe('rgb(74, 145, 217)');
+  });
+
+  it('keeps the copy button free of block content, with the code and data as its siblings', () => {
+    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57, locked: false }], 'hex');
+
     const colorButton = container.querySelector('.swatch-color');
-    expect(colorButton.textContent).toContain('#4A91D9');
-    expect(colorButton.style.backgroundColor).toBe('rgb(74, 145, 217)');
+    expect(colorButton.children).toHaveLength(0);
+    expect(colorButton.parentElement.querySelector('.swatch-code')).not.toBeNull();
+  });
+
+  it('hides the visible code from assistive tech, which already gets it from the button label', () => {
+    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57, locked: false }], 'hex');
+
+    expect(container.querySelector('.swatch-details').getAttribute('aria-hidden')).toBe('true');
+    expect(container.querySelector('.swatch-color').getAttribute('aria-label')).toBe(
+      'Copiar #4A91D9',
+    );
   });
 
   it('exposes the HSL/contrast data to assistive tech via aria-describedby, since aria-label hides it', () => {
@@ -55,6 +70,19 @@ describe('renderPalette', () => {
     const swatch = container.firstElementChild;
     expect(swatch.textContent).toContain('210 65 57');
     expect(swatch.textContent).toMatch(/\d+(\.\d)?:1/);
+  });
+
+  it('marks the grid with its color count, so CSS can lay the band out in one or two rows', () => {
+    renderPalette(
+      container,
+      [
+        { hue: 0, saturation: 50, lightness: 50, locked: false },
+        { hue: 180, saturation: 50, lightness: 50, locked: false },
+      ],
+      'hex',
+    );
+
+    expect(container.dataset.count).toBe('2');
   });
 
   it('replaces previous content on re-render instead of appending', () => {
@@ -151,7 +179,18 @@ describe('renderPalette', () => {
 
       const swatch = container.firstElementChild;
       expect(swatch.querySelector('.swatch-color .lock-button')).toBeNull();
-      expect(swatch.children).toHaveLength(2);
+      expect(swatch.querySelector(':scope > .lock-button')).not.toBeNull();
+    });
+
+    it('draws a closed, filled padlock when locked and an open outlined one when unlocked', () => {
+      renderPalette(container, colors, 'hex');
+
+      const [unlockedIcon, lockedIcon] = container.querySelectorAll('.lock-button svg');
+      expect(unlockedIcon.querySelector('rect').getAttribute('fill')).toBe('none');
+      expect(lockedIcon.querySelector('rect').getAttribute('fill')).toBe('currentColor');
+      expect(unlockedIcon.querySelector('path').getAttribute('d')).not.toBe(
+        lockedIcon.querySelector('path').getAttribute('d'),
+      );
     });
 
     it('exposes the locked state through aria-pressed', () => {
@@ -342,23 +381,6 @@ describe('renderArchive', () => {
   });
 });
 
-describe('pickColumnCount', () => {
-  it('keeps the preferred column count when it does not orphan a single item', () => {
-    expect(pickColumnCount(3, 6)).toBe(3);
-    expect(pickColumnCount(3, 8)).toBe(3);
-    expect(pickColumnCount(3, 9)).toBe(3);
-    expect(pickColumnCount(5, 9)).toBe(5);
-  });
-
-  it('picks a smaller column count when it avoids stranding one item alone', () => {
-    expect(pickColumnCount(5, 6)).toBe(4);
-  });
-
-  it('picks a larger column count when going smaller is not possible', () => {
-    expect(pickColumnCount(2, 9)).toBe(3);
-  });
-});
-
 describe('markExitingSwatches', () => {
   let container;
 
@@ -492,34 +514,6 @@ describe('focusBatchButton', () => {
     const container = document.createElement('ul');
 
     expect(() => focusBatchButton(container, '.batch-confirm')).not.toThrow();
-  });
-});
-
-describe('updateGridColumns', () => {
-  let container;
-  let getComputedStyleSpy;
-
-  beforeEach(() => {
-    container = document.createElement('ul');
-    getComputedStyleSpy = vi
-      .spyOn(window, 'getComputedStyle')
-      .mockReturnValue({ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr' });
-  });
-
-  afterEach(() => {
-    getComputedStyleSpy.mockRestore();
-  });
-
-  it('overrides the column count when it would strand a single item', () => {
-    updateGridColumns(container, 6);
-
-    expect(container.style.gridTemplateColumns).toBe('repeat(4, 1fr)');
-  });
-
-  it('leaves the CSS-driven column count untouched when nothing would be stranded', () => {
-    updateGridColumns(container, 8);
-
-    expect(container.style.gridTemplateColumns).toBe('');
   });
 });
 

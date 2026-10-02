@@ -2,10 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   MAX_BATCHES,
   addBatch,
+  THEME_STORAGE_KEY,
   findBatch,
   loadArchive,
+  loadThemePreference,
   persistArchive,
   removeBatch,
+  saveThemePreference,
 } from '../js/storage.js';
 
 const validColor = { hue: 210, saturation: 65, lightness: 57 };
@@ -175,5 +178,39 @@ describe('findBatch', () => {
 
   it('returns undefined when no batch matches', () => {
     expect(findBatch([], 1)).toBeUndefined();
+  });
+});
+
+describe('theme preference', () => {
+  it('defaults to system on a first visit', () => {
+    expect(loadThemePreference()).toBe('system');
+  });
+
+  it('returns the theme that was saved before', () => {
+    saveThemePreference('dark');
+
+    expect(loadThemePreference()).toBe('dark');
+  });
+
+  it('falls back to system when the stored value is not one of the three options', () => {
+    localStorage.setItem(THEME_STORAGE_KEY, '"><script>alert(1)</script>');
+
+    expect(loadThemePreference()).toBe('system');
+  });
+
+  it('falls back to system when localStorage throws on read', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+
+    expect(loadThemePreference()).toBe('system');
+  });
+
+  it('reports failure instead of throwing when localStorage rejects the write', () => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('quota');
+    });
+
+    expect(saveThemePreference('light')).toBe(false);
   });
 });

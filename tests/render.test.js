@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  applyTheme,
   describePalette,
   focusBatchButton,
   focusFirstSwatch,
@@ -463,6 +464,42 @@ describe('renderRadioOptions', () => {
 
     expect(container.querySelectorAll('input')).toHaveLength(2);
     expect(container.querySelectorAll('input')[1].checked).toBe(true);
+  });
+});
+
+describe('applyTheme', () => {
+  afterEach(() => {
+    delete document.documentElement.dataset.theme;
+  });
+
+  it('forces light or dark through data-theme on the root element', () => {
+    applyTheme('dark');
+
+    expect(document.documentElement.dataset.theme).toBe('dark');
+  });
+
+  it('removes data-theme for system, so CSS follows prefers-color-scheme', () => {
+    applyTheme('dark');
+
+    applyTheme('system');
+
+    expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
+  });
+});
+
+describe('renderRadioOptions with icons', () => {
+  it('adds a decorative icon and keeps the option text available to assistive tech', () => {
+    const container = document.createElement('div');
+
+    renderRadioOptions(container, {
+      name: 'color-theme',
+      options: [{ value: 'dark', label: 'Oscuro', icon: 'dark' }],
+      selected: 'dark',
+    });
+
+    const label = container.querySelector('label');
+    expect(label.querySelector('svg').getAttribute('aria-hidden')).toBe('true');
+    expect(label.textContent).toBe('Oscuro');
   });
 });
 

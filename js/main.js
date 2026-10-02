@@ -9,6 +9,7 @@ import {
   unlockAll,
 } from './palette.js';
 import {
+  applyTheme,
   describePalette,
   focusBatchButton,
   focusFirstSwatch,
@@ -22,11 +23,14 @@ import {
 } from './render.js';
 import {
   MAX_BATCHES,
+  THEME_OPTIONS,
   addBatch,
   findBatch,
   loadArchive,
+  loadThemePreference,
   persistArchive,
   removeBatch,
+  saveThemePreference,
 } from './storage.js';
 import { createToast } from './toast.js';
 
@@ -38,6 +42,12 @@ const FORMAT_OPTIONS = [
   { value: 'hex', label: 'HEX' },
   { value: 'hsl', label: 'HSL' },
 ];
+const THEME_LABELS = { system: 'Sistema', light: 'Claro', dark: 'Oscuro' };
+const THEME_SELECTOR_OPTIONS = THEME_OPTIONS.map((value) => ({
+  value,
+  label: THEME_LABELS[value],
+  icon: value,
+}));
 
 const grid = document.querySelector('#palette-grid');
 const generateButton = document.querySelector('#generate-button');
@@ -47,6 +57,7 @@ const sizeFieldset = document.querySelector('#size-fieldset');
 const formatFieldset = document.querySelector('#format-fieldset');
 const sizeOptions = document.querySelector('#size-options');
 const formatOptions = document.querySelector('#format-options');
+const themeOptions = document.querySelector('#theme-options');
 const paletteSummary = document.querySelector('#palette-summary');
 const skipLink = document.querySelector('#skip-link');
 const generationCounterDisplay = document.querySelector('#generation-counter');
@@ -55,6 +66,7 @@ const toast = createToast(document.querySelector('#toast'));
 
 let colors = createPalette(PALETTE_SIZES[0]);
 let format = FORMAT_OPTIONS[0].value;
+let theme = loadThemePreference();
 let generationCount = 1;
 
 const initialArchive = loadArchive();
@@ -92,6 +104,21 @@ function renderFormatOptions() {
     selected: format,
     onChange: handleFormatChange,
   });
+}
+
+function renderThemeOptions() {
+  renderRadioOptions(themeOptions, {
+    name: 'color-theme',
+    options: THEME_SELECTOR_OPTIONS,
+    selected: theme,
+    onChange: handleThemeChange,
+  });
+}
+
+function handleThemeChange(value) {
+  theme = value;
+  applyTheme(theme);
+  saveThemePreference(theme);
 }
 
 async function handleSwatchClick(code) {
@@ -188,6 +215,8 @@ function renderArchiveList() {
   );
 }
 
+applyTheme(theme);
+renderThemeOptions();
 renderSizeOptions();
 renderFormatOptions();
 renderPaletteGrid();

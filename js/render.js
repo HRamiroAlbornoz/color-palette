@@ -6,6 +6,7 @@ import {
   hslToRgb,
   rgbToHex,
 } from './color.js';
+import { DEFAULT_THEME } from './storage.js';
 
 const APP_LOCALE = 'es-AR';
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
@@ -28,11 +29,11 @@ function createSvgElement(tagName, attributes) {
   return element;
 }
 
-function createLockIcon(locked) {
-  const icon = createSvgElement('svg', {
+function createIconSvg(size) {
+  return createSvgElement('svg', {
     viewBox: '0 0 24 24',
-    width: '20',
-    height: '20',
+    width: String(size),
+    height: String(size),
     fill: 'none',
     stroke: 'currentColor',
     'stroke-width': '2',
@@ -40,6 +41,10 @@ function createLockIcon(locked) {
     'stroke-linejoin': 'round',
     'aria-hidden': 'true',
   });
+}
+
+function createLockIcon(locked) {
+  const icon = createIconSvg(20);
   const shackle = createSvgElement('path', {
     d: locked ? 'M8 11V7a4 4 0 0 1 8 0v4' : 'M8 11V7a4 4 0 0 1 7.5-2',
   });
@@ -153,9 +158,34 @@ export function focusFirstSwatch(container) {
   container.querySelector('.swatch-color')?.focus();
 }
 
+const OPTION_ICONS = {
+  system: [
+    ['rect', { x: '3', y: '4', width: '18', height: '12', rx: '1' }],
+    ['path', { d: 'M8 20h8M12 16v4' }],
+  ],
+  light: [
+    ['circle', { cx: '12', cy: '12', r: '4' }],
+    [
+      'path',
+      {
+        d: 'M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4',
+      },
+    ],
+  ],
+  dark: [['path', { d: 'M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z' }]],
+};
+
+function createOptionIcon(iconName) {
+  const icon = createIconSvg(16);
+  icon.append(
+    ...OPTION_ICONS[iconName].map(([tagName, attributes]) => createSvgElement(tagName, attributes)),
+  );
+  return icon;
+}
+
 export function renderRadioOptions(container, { name, options, selected, onChange = () => {} }) {
   container.replaceChildren(
-    ...options.map(({ value, label }) => {
+    ...options.map(({ value, label, icon }) => {
       const input = document.createElement('input');
       input.type = 'radio';
       input.name = name;
@@ -164,11 +194,27 @@ export function renderRadioOptions(container, { name, options, selected, onChang
       input.checked = value === selected;
       input.addEventListener('change', () => onChange(value));
 
+      const text = document.createElement('span');
+      text.className = 'option-text';
+      text.textContent = label;
+
       const labelElement = document.createElement('label');
-      labelElement.append(input, label);
+      labelElement.append(input);
+      if (icon) {
+        labelElement.append(createOptionIcon(icon));
+      }
+      labelElement.append(text);
       return labelElement;
     }),
   );
+}
+
+export function applyTheme(theme) {
+  if (theme === DEFAULT_THEME) {
+    delete document.documentElement.dataset.theme;
+  } else {
+    document.documentElement.dataset.theme = theme;
+  }
 }
 
 export function describePalette(colors) {

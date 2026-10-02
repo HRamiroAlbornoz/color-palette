@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Generador de Paletas · Colorfly Studio</title>
+    <script>
+      try {
+        const storedTheme = localStorage.getItem('colorfly-theme');
+        if (storedTheme === 'light' || storedTheme === 'dark') {
+          document.documentElement.dataset.theme = storedTheme;
+        }
+      } catch {}
+    </script>
     <link rel="preload" href="fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin />
     <link
       rel="preload"
@@ -21,10 +29,16 @@
     <div class="app">
       <p class="brand sidebar-region">Colorfly Studio</p>
       <header class="topbar">
-        <h1 class="generation-title">Generación Nº<span id="generation-counter"></span></h1>
-        <p class="topbar-meta">
-          <span id="palette-summary"></span> · <time id="topbar-clock"></time>
-        </p>
+        <div>
+          <h1 class="generation-title">Generación Nº<span id="generation-counter"></span></h1>
+          <p class="topbar-meta">
+            <span id="palette-summary"></span> · <time id="topbar-clock"></time>
+          </p>
+        </div>
+        <fieldset class="segmented segmented--theme">
+          <legend class="visually-hidden">Tema</legend>
+          <div class="segmented-options" id="theme-options"></div>
+        </fieldset>
       </header>
       <section class="controls sidebar-region" aria-label="Controles de generación">
         <button type="button" id="generate-button" class="generate-button">Generar paleta</button>

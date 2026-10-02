@@ -1,12 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  applyTheme,
+  describePalette,
   focusBatchButton,
+  focusFirstSwatch,
   markExitingSwatches,
-  pickColumnCount,
   renderArchive,
-  renderHeaderMeta,
   renderPalette,
-  updateGridColumns,
+  renderRadioOptions,
+  renderTopbarMeta,
   waitForSwatchesToExit,
 } from '../js/render.js';
 
@@ -31,9 +33,26 @@ describe('renderPalette', () => {
   it('shows the exact HEX code matching the swatch background color', () => {
     renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57, locked: false }], 'hex');
 
+    const swatch = container.firstElementChild;
+    expect(swatch.querySelector('.swatch-code').textContent).toBe('#4A91D9');
+    expect(swatch.style.backgroundColor).toBe('rgb(74, 145, 217)');
+  });
+
+  it('keeps the copy button free of block content, with the code and data as its siblings', () => {
+    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57, locked: false }], 'hex');
+
     const colorButton = container.querySelector('.swatch-color');
-    expect(colorButton.textContent).toContain('#4A91D9');
-    expect(colorButton.style.backgroundColor).toBe('rgb(74, 145, 217)');
+    expect(colorButton.children).toHaveLength(0);
+    expect(colorButton.parentElement.querySelector('.swatch-code')).not.toBeNull();
+  });
+
+  it('hides the visible code from assistive tech, which already gets it from the button label', () => {
+    renderPalette(container, [{ hue: 210, saturation: 65, lightness: 57, locked: false }], 'hex');
+
+    expect(container.querySelector('.swatch-details').getAttribute('aria-hidden')).toBe('true');
+    expect(container.querySelector('.swatch-color').getAttribute('aria-label')).toBe(
+      'Copiar #4A91D9',
+    );
   });
 
   it('exposes the HSL/contrast data to assistive tech via aria-describedby, since aria-label hides it', () => {
@@ -52,6 +71,19 @@ describe('renderPalette', () => {
     const swatch = container.firstElementChild;
     expect(swatch.textContent).toContain('210 65 57');
     expect(swatch.textContent).toMatch(/\d+(\.\d)?:1/);
+  });
+
+  it('marks the grid with its color count, so CSS can lay the band out in one or two rows', () => {
+    renderPalette(
+      container,
+      [
+        { hue: 0, saturation: 50, lightness: 50, locked: false },
+        { hue: 180, saturation: 50, lightness: 50, locked: false },
+      ],
+      'hex',
+    );
+
+    expect(container.dataset.count).toBe('2');
   });
 
   it('replaces previous content on re-render instead of appending', () => {
@@ -148,7 +180,18 @@ describe('renderPalette', () => {
 
       const swatch = container.firstElementChild;
       expect(swatch.querySelector('.swatch-color .lock-button')).toBeNull();
-      expect(swatch.children).toHaveLength(2);
+      expect(swatch.querySelector(':scope > .lock-button')).not.toBeNull();
+    });
+
+    it('draws a closed, filled padlock when locked and an open outlined one when unlocked', () => {
+      renderPalette(container, colors, 'hex');
+
+      const [unlockedIcon, lockedIcon] = container.querySelectorAll('.lock-button svg');
+      expect(unlockedIcon.querySelector('rect').getAttribute('fill')).toBe('none');
+      expect(lockedIcon.querySelector('rect').getAttribute('fill')).toBe('currentColor');
+      expect(unlockedIcon.querySelector('path').getAttribute('d')).not.toBe(
+        lockedIcon.querySelector('path').getAttribute('d'),
+      );
     });
 
     it('exposes the locked state through aria-pressed', () => {
@@ -339,23 +382,6 @@ describe('renderArchive', () => {
   });
 });
 
-describe('pickColumnCount', () => {
-  it('keeps the preferred column count when it does not orphan a single item', () => {
-    expect(pickColumnCount(3, 6)).toBe(3);
-    expect(pickColumnCount(3, 8)).toBe(3);
-    expect(pickColumnCount(3, 9)).toBe(3);
-    expect(pickColumnCount(5, 9)).toBe(5);
-  });
-
-  it('picks a smaller column count when it avoids stranding one item alone', () => {
-    expect(pickColumnCount(5, 6)).toBe(4);
-  });
-
-  it('picks a larger column count when going smaller is not possible', () => {
-    expect(pickColumnCount(2, 9)).toBe(3);
-  });
-});
-
 describe('markExitingSwatches', () => {
   let container;
 
@@ -378,17 +404,134 @@ describe('markExitingSwatches', () => {
   });
 });
 
-describe('renderHeaderMeta', () => {
+describe('renderTopbarMeta', () => {
   it('writes the count and a formatted time onto the given elements', () => {
     const counterElement = document.createElement('span');
     const clockElement = document.createElement('time');
     const now = new Date('2026-09-05T21:05:00.000Z');
 
-    renderHeaderMeta(counterElement, clockElement, { count: 3, now });
+    renderTopbarMeta(counterElement, clockElement, { count: 3, now });
 
     expect(counterElement.textContent).toBe('3');
     expect(clockElement.textContent).not.toBe('');
     expect(clockElement.dateTime).toBe(now.toISOString());
+  });
+});
+
+describe('renderRadioOptions', () => {
+  const options = [
+    { value: 'hex', label: 'HEX' },
+    { value: 'hsl', label: 'HSL' },
+  ];
+
+  it('renders one radio per option, sharing a name, with only the selected one checked', () => {
+    const container = document.createElement('div');
+
+    renderRadioOptions(container, { name: 'color-format', options, selected: 'hsl' });
+
+    const inputs = container.querySelectorAll('input[type="radio"]');
+    expect(Array.from(inputs, (input) => input.value)).toEqual(['hex', 'hsl']);
+    expect(Array.from(inputs, (input) => input.name)).toEqual(['color-format', 'color-format']);
+    expect(Array.from(inputs, (input) => input.checked)).toEqual([false, true]);
+  });
+
+  it('wraps each radio in a label that shows its option as visible text', () => {
+    const container = document.createElement('div');
+
+    renderRadioOptions(container, { name: 'color-format', options, selected: 'hex' });
+
+    const labels = container.querySelectorAll('label');
+    expect(Array.from(labels, (label) => label.textContent)).toEqual(['HEX', 'HSL']);
+  });
+
+  it('calls onChange with the value of the option the user picks', () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+    const onChange = vi.fn();
+    renderRadioOptions(container, { name: 'color-format', options, selected: 'hex', onChange });
+
+    container.querySelectorAll('input')[1].click();
+
+    expect(onChange).toHaveBeenCalledWith('hsl');
+    container.remove();
+  });
+
+  it('replaces the previous options when rendered again with another selection', () => {
+    const container = document.createElement('div');
+    renderRadioOptions(container, { name: 'color-format', options, selected: 'hex' });
+
+    renderRadioOptions(container, { name: 'color-format', options, selected: 'hsl' });
+
+    expect(container.querySelectorAll('input')).toHaveLength(2);
+    expect(container.querySelectorAll('input')[1].checked).toBe(true);
+  });
+});
+
+describe('applyTheme', () => {
+  afterEach(() => {
+    delete document.documentElement.dataset.theme;
+  });
+
+  it('forces light or dark through data-theme on the root element', () => {
+    applyTheme('dark');
+
+    expect(document.documentElement.dataset.theme).toBe('dark');
+  });
+
+  it('removes data-theme for system, so CSS follows prefers-color-scheme', () => {
+    applyTheme('dark');
+
+    applyTheme('system');
+
+    expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
+  });
+});
+
+describe('renderRadioOptions with icons', () => {
+  it('adds a decorative icon and keeps the option text available to assistive tech', () => {
+    const container = document.createElement('div');
+
+    renderRadioOptions(container, {
+      name: 'color-theme',
+      options: [{ value: 'dark', label: 'Oscuro', icon: 'dark' }],
+      selected: 'dark',
+    });
+
+    const label = container.querySelector('label');
+    expect(label.querySelector('svg').getAttribute('aria-hidden')).toBe('true');
+    expect(label.textContent).toBe('Oscuro');
+  });
+});
+
+describe('describePalette', () => {
+  it('counts colors and locked colors', () => {
+    const colors = [{ locked: true }, { locked: false }, { locked: true }];
+
+    expect(describePalette(colors)).toBe('3 colores · 2 bloqueados');
+  });
+
+  it('uses the singular for exactly one locked color', () => {
+    expect(describePalette([{ locked: true }, { locked: false }])).toBe('2 colores · 1 bloqueado');
+  });
+});
+
+describe('focusFirstSwatch', () => {
+  it('moves focus to the copy button of the first swatch', () => {
+    const container = document.createElement('ul');
+    document.body.append(container);
+    renderPalette(
+      container,
+      [
+        { hue: 210, saturation: 65, lightness: 57, locked: false },
+        { hue: 30, saturation: 60, lightness: 50, locked: false },
+      ],
+      'hex',
+    );
+
+    focusFirstSwatch(container);
+
+    expect(document.activeElement).toBe(container.querySelector('.swatch-color'));
+    container.remove();
   });
 });
 
@@ -408,34 +551,6 @@ describe('focusBatchButton', () => {
     const container = document.createElement('ul');
 
     expect(() => focusBatchButton(container, '.batch-confirm')).not.toThrow();
-  });
-});
-
-describe('updateGridColumns', () => {
-  let container;
-  let getComputedStyleSpy;
-
-  beforeEach(() => {
-    container = document.createElement('ul');
-    getComputedStyleSpy = vi
-      .spyOn(window, 'getComputedStyle')
-      .mockReturnValue({ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr' });
-  });
-
-  afterEach(() => {
-    getComputedStyleSpy.mockRestore();
-  });
-
-  it('overrides the column count when it would strand a single item', () => {
-    updateGridColumns(container, 6);
-
-    expect(container.style.gridTemplateColumns).toBe('repeat(4, 1fr)');
-  });
-
-  it('leaves the CSS-driven column count untouched when nothing would be stranded', () => {
-    updateGridColumns(container, 8);
-
-    expect(container.style.gridTemplateColumns).toBe('');
   });
 });
 

@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "geist",
+        "createdAt": "2026-10-01T23:44:45.841Z",
+        "reason": "user confirmed: chose design C (Geist + Geist Mono) and self-hosting on 2026-10-01; recorded in spec section 3 and the direction contract"
+      },
+      {
+        "rule": "overused-font",
+        "value": "geist mono",
+        "createdAt": "2026-10-01T23:44:46.000Z",
+        "reason": "user confirmed: chose design C (Geist + Geist Mono) and self-hosting on 2026-10-01; recorded in spec section 3 and the direction contract"
+      }
+    ]
+  }
+}

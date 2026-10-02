@@ -93,6 +93,12 @@ export function getPrimaryCode(hsl, hex, format) {
   return format === 'hsl' ? hslToCss(hsl) : hex;
 }
 
+export function getSecondaryCode(hsl, hex, format) {
+  return format === 'hsl'
+    ? { label: 'HEX', value: hex }
+    : { label: 'HSL', value: `${hsl.hue} ${hsl.saturation} ${hsl.lightness}` };
+}
+
 function channelToLinear(channel) {
   const normalized = channel / 255;
   return normalized <= 0.03928 ? normalized / 12.92 : Math.pow((normalized + 0.055) / 1.055, 2.4);

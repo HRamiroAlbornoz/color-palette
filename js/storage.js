@@ -4,6 +4,28 @@ import { PALETTE_SIZES } from './palette.js';
 export const MAX_BATCHES = 12;
 const STORAGE_KEY = 'colorfly-palette-archive';
 
+export const THEME_STORAGE_KEY = 'colorfly-theme';
+export const THEME_OPTIONS = ['system', 'light', 'dark'];
+export const DEFAULT_THEME = THEME_OPTIONS[0];
+
+export function loadThemePreference() {
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    return THEME_OPTIONS.includes(stored) ? stored : DEFAULT_THEME;
+  } catch {
+    return DEFAULT_THEME;
+  }
+}
+
+export function saveThemePreference(theme) {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function isRecord(value) {
   return typeof value === 'object' && value !== null;
 }

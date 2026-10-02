@@ -4,6 +4,7 @@ import {
   getContrastRatio,
   getPrimaryCode,
   getReadableTextColor,
+  getSecondaryCode,
   hslToCss,
   hslToHex,
   hslToRgb,
@@ -95,16 +96,24 @@ describe('hslToCss', () => {
   });
 });
 
-describe('getPrimaryCode', () => {
+describe('primary and secondary codes', () => {
   const hsl = { hue: 210, saturation: 65, lightness: 57 };
   const hex = '#4A91D9';
 
-  it('returns the given HEX code when the format is hex', () => {
+  it('returns the given HEX code as primary when the format is hex', () => {
     expect(getPrimaryCode(hsl, hex, 'hex')).toBe('#4A91D9');
   });
 
-  it('returns the CSS hsl() string when the format is hsl', () => {
+  it('returns the CSS hsl() string as primary when the format is hsl', () => {
     expect(getPrimaryCode(hsl, hex, 'hsl')).toBe('hsl(210, 65%, 57%)');
+  });
+
+  it('returns the HSL triplet as secondary data when the primary format is hex', () => {
+    expect(getSecondaryCode(hsl, hex, 'hex')).toEqual({ label: 'HSL', value: '210 65 57' });
+  });
+
+  it('returns the HEX code as secondary data when the primary format is hsl, so HEX never disappears', () => {
+    expect(getSecondaryCode(hsl, hex, 'hsl')).toEqual({ label: 'HEX', value: '#4A91D9' });
   });
 });
 

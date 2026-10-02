@@ -1,5 +1,6 @@
 import { copyToClipboard } from './clipboard.js';
 import {
+  PALETTE_SIZES,
   createPalette,
   isFullyLocked,
   regeneratePalette,
@@ -8,42 +9,64 @@ import {
   unlockAll,
 } from './palette.js';
 import {
+  applyTheme,
+  describePalette,
   focusBatchButton,
+  focusFirstSwatch,
   focusLockButton,
   markExitingSwatches,
   renderArchive,
-  renderHeaderMeta,
   renderPalette,
-  updateGridColumns,
+  renderRadioOptions,
+  renderTopbarMeta,
   waitForSwatchesToExit,
 } from './render.js';
 import {
   MAX_BATCHES,
+  THEME_OPTIONS,
   addBatch,
   findBatch,
   loadArchive,
+  loadThemePreference,
   persistArchive,
   removeBatch,
+  saveThemePreference,
 } from './storage.js';
 import { createToast } from './toast.js';
 
 const ANIMATE_ENTRANCE = true;
 const CLOCK_UPDATE_INTERVAL_MS = 30000;
-const RESIZE_DEBOUNCE_MS = 150;
+
+const SIZE_OPTIONS = PALETTE_SIZES.map((size) => ({ value: String(size), label: String(size) }));
+const FORMAT_OPTIONS = [
+  { value: 'hex', label: 'HEX' },
+  { value: 'hsl', label: 'HSL' },
+];
+const THEME_LABELS = { system: 'Sistema', light: 'Claro', dark: 'Oscuro' };
+const THEME_SELECTOR_OPTIONS = THEME_OPTIONS.map((value) => ({
+  value,
+  label: THEME_LABELS[value],
+  icon: value,
+}));
 
 const grid = document.querySelector('#palette-grid');
 const generateButton = document.querySelector('#generate-button');
 const saveBatchButton = document.querySelector('#save-batch-button');
 const archiveList = document.querySelector('#archive-list');
-const sizeInputs = document.querySelectorAll('input[name="palette-size"]');
-const formatInputs = document.querySelectorAll('input[name="color-format"]');
+const sizeFieldset = document.querySelector('#size-fieldset');
+const formatFieldset = document.querySelector('#format-fieldset');
+const sizeOptions = document.querySelector('#size-options');
+const formatOptions = document.querySelector('#format-options');
+const themeOptions = document.querySelector('#theme-options');
+const paletteSummary = document.querySelector('#palette-summary');
+const skipLink = document.querySelector('#skip-link');
 const generationCounterDisplay = document.querySelector('#generation-counter');
-const headerClock = document.querySelector('#header-clock');
+const topbarClock = document.querySelector('#topbar-clock');
 const toast = createToast(document.querySelector('#toast'));
 
-const initialSize = Number(document.querySelector('input[name="palette-size"]:checked').value);
-let colors = createPalette(initialSize);
-let format = document.querySelector('input[name="color-format"]:checked').value;
+let colors = createPalette(PALETTE_SIZES[0]);
+let format = FORMAT_OPTIONS[0].value;
+let theme = loadThemePreference();
 let generationCount = 1;
 
 const initialArchive = loadArchive();
@@ -54,19 +77,48 @@ let isGenerating = false;
 
 function setControlsDisabled(disabled) {
   generateButton.disabled = disabled;
-  sizeInputs.forEach((input) => {
-    input.disabled = disabled;
-  });
-  formatInputs.forEach((input) => {
-    input.disabled = disabled;
-  });
+  sizeFieldset.disabled = disabled;
+  formatFieldset.disabled = disabled;
 }
 
-function updateHeaderMeta() {
-  renderHeaderMeta(generationCounterDisplay, headerClock, {
+function updateTopbarMeta() {
+  renderTopbarMeta(generationCounterDisplay, topbarClock, {
     count: generationCount,
     now: new Date(),
   });
+}
+
+function renderSizeOptions() {
+  renderRadioOptions(sizeOptions, {
+    name: 'palette-size',
+    options: SIZE_OPTIONS,
+    selected: String(colors.length),
+    onChange: handleSizeChange,
+  });
+}
+
+function renderFormatOptions() {
+  renderRadioOptions(formatOptions, {
+    name: 'color-format',
+    options: FORMAT_OPTIONS,
+    selected: format,
+    onChange: handleFormatChange,
+  });
+}
+
+function renderThemeOptions() {
+  renderRadioOptions(themeOptions, {
+    name: 'color-theme',
+    options: THEME_SELECTOR_OPTIONS,
+    selected: theme,
+    onChange: handleThemeChange,
+  });
+}
+
+function handleThemeChange(value) {
+  theme = value;
+  applyTheme(theme);
+  saveThemePreference(theme);
 }
 
 async function handleSwatchClick(code) {
@@ -79,6 +131,16 @@ async function handleSwatchClick(code) {
   } else {
     toast.show('No se pudo copiar el color.');
   }
+}
+
+function handleSizeChange(value) {
+  colors = resizePalette(colors, Number(value));
+  renderPaletteGrid();
+}
+
+function handleFormatChange(value) {
+  format = value;
+  renderPaletteGrid();
 }
 
 function handleLockToggle(index) {
@@ -102,14 +164,7 @@ function handleRestoreBatch(number) {
   }
 
   colors = unlockAll(batch.colors);
-
-  const matchingSizeInput = Array.from(sizeInputs).find(
-    (input) => Number(input.value) === colors.length,
-  );
-  if (matchingSizeInput) {
-    matchingSizeInput.checked = true;
-  }
-
+  renderSizeOptions();
   renderPaletteGrid();
 }
 
@@ -143,6 +198,7 @@ function handleConfirmDelete(number) {
 
 function renderPaletteGrid(animateEntrance = false) {
   renderPalette(grid, colors, format, handleSwatchClick, handleLockToggle, animateEntrance);
+  paletteSummary.textContent = describePalette(colors);
 }
 
 function renderArchiveList() {
@@ -159,14 +215,18 @@ function renderArchiveList() {
   );
 }
 
+applyTheme(theme);
+renderThemeOptions();
+renderSizeOptions();
+renderFormatOptions();
 renderPaletteGrid();
 renderArchiveList();
-updateHeaderMeta();
-setInterval(updateHeaderMeta, CLOCK_UPDATE_INTERVAL_MS);
-let resizeTimeoutId;
-window.addEventListener('resize', () => {
-  clearTimeout(resizeTimeoutId);
-  resizeTimeoutId = setTimeout(() => updateGridColumns(grid, colors.length), RESIZE_DEBOUNCE_MS);
+updateTopbarMeta();
+setInterval(updateTopbarMeta, CLOCK_UPDATE_INTERVAL_MS);
+
+skipLink.addEventListener('click', (event) => {
+  event.preventDefault();
+  focusFirstSwatch(grid);
 });
 
 generateButton.addEventListener('click', async () => {
@@ -182,7 +242,7 @@ generateButton.addEventListener('click', async () => {
 
     colors = regeneratePalette(colors);
     generationCount += 1;
-    updateHeaderMeta();
+    updateTopbarMeta();
     renderPaletteGrid(ANIMATE_ENTRANCE);
   } finally {
     isGenerating = false;
@@ -213,18 +273,4 @@ saveBatchButton.addEventListener('click', () => {
   batches = result.batches;
   toast.show('Paleta guardada en el archivo.');
   renderArchiveList();
-});
-
-sizeInputs.forEach((input) => {
-  input.addEventListener('change', (event) => {
-    colors = resizePalette(colors, Number(event.target.value));
-    renderPaletteGrid();
-  });
-});
-
-formatInputs.forEach((input) => {
-  input.addEventListener('change', (event) => {
-    format = event.target.value;
-    renderPaletteGrid();
-  });
 });

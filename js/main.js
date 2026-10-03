@@ -16,6 +16,7 @@ import {
   focusLockButton,
   markExitingSwatches,
   renderArchive,
+  renderContrastPanel,
   renderPalette,
   renderRadioOptions,
   renderTopbarMeta,
@@ -50,6 +51,7 @@ const THEME_SELECTOR_OPTIONS = THEME_OPTIONS.map((value) => ({
 }));
 
 const grid = document.querySelector('#palette-grid');
+const contrastList = document.querySelector('#contrast-list');
 const generateButton = document.querySelector('#generate-button');
 const saveBatchButton = document.querySelector('#save-batch-button');
 const archiveList = document.querySelector('#archive-list');
@@ -199,6 +201,7 @@ function handleConfirmDelete(number) {
 function renderPaletteGrid(animateEntrance = false) {
   renderPalette(grid, colors, format, handleSwatchClick, handleLockToggle, animateEntrance);
   paletteSummary.textContent = describePalette(colors);
+  renderContrastPanel(contrastList, colors);
 }
 
 function renderArchiveList() {

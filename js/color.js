@@ -116,6 +116,23 @@ export function getContrastRatio(rgbA, rgbB) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+const AAA_CONTRAST_RATIO = 7;
+
+export function getContrastGrade(contrastRatio) {
+  return contrastRatio >= AAA_CONTRAST_RATIO ? 'AAA' : 'AA';
+}
+
+export function formatContrastRatio(contrastRatio) {
+  return `${(Math.floor(contrastRatio * 10) / 10).toFixed(1)}:1`;
+}
+
+export function describeContrast(contrastRatio) {
+  return {
+    grade: getContrastGrade(contrastRatio),
+    ratioText: formatContrastRatio(contrastRatio),
+  };
+}
+
 export function getReadableTextColor(rgb) {
   const white = { r: 255, g: 255, b: 255 };
   const black = { r: 0, g: 0, b: 0 };

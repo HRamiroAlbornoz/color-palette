@@ -7,6 +7,7 @@ import {
   SATURATION_MIN,
   createRandomHsl,
   formatContrastRatio,
+  formatPaletteAsCss,
   getContrastGrade,
   getContrastRatio,
   getPrimaryCode,
@@ -173,6 +174,25 @@ describe('getReadableTextColor', () => {
     }
 
     expect(lowestRatio).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('formatPaletteAsCss', () => {
+  const colors = [
+    { hue: 210, saturation: 65, lightness: 57, locked: true },
+    { hue: 0, saturation: 100, lightness: 50, locked: false },
+  ];
+
+  it('declares one numbered variable per color inside :root, in palette order, as HEX', () => {
+    expect(formatPaletteAsCss(colors, 'hex')).toBe(
+      ':root {\n  --color-1: #4A91D9;\n  --color-2: #FF0000;\n}',
+    );
+  });
+
+  it('writes the values as hsl() when the active format is HSL', () => {
+    expect(formatPaletteAsCss(colors, 'hsl')).toBe(
+      ':root {\n  --color-1: hsl(210, 65%, 57%);\n  --color-2: hsl(0, 100%, 50%);\n}',
+    );
   });
 });
 

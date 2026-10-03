@@ -58,6 +58,11 @@ input {
   color: inherit;
 }
 
+pre,
+code {
+  font: inherit;
+}
+
 button {
   background: none;
   border: none;

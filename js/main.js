@@ -1,4 +1,5 @@
 import { copyToClipboard } from './clipboard.js';
+import { formatPaletteAsCss } from './color.js';
 import {
   PALETTE_SIZES,
   createPalette,
@@ -52,6 +53,8 @@ const THEME_SELECTOR_OPTIONS = THEME_OPTIONS.map((value) => ({
 
 const grid = document.querySelector('#palette-grid');
 const contrastList = document.querySelector('#contrast-list');
+const cssExportCode = document.querySelector('#css-export-code');
+const copyCssButton = document.querySelector('#copy-css-button');
 const generateButton = document.querySelector('#generate-button');
 const saveBatchButton = document.querySelector('#save-batch-button');
 const archiveList = document.querySelector('#archive-list');
@@ -123,26 +126,40 @@ function handleThemeChange(value) {
   saveThemePreference(theme);
 }
 
-async function handleSwatchClick(code) {
-  const result = await copyToClipboard(code);
+async function copyAndAnnounce(text, { successMessage, failureMessage }) {
+  const result = await copyToClipboard(text);
 
   if (result.ok) {
-    toast.show(`Copiado ${code}`);
+    toast.show(successMessage);
   } else if (result.reason === 'unavailable') {
     toast.show('El portapapeles no está disponible en este navegador.');
   } else {
-    toast.show('No se pudo copiar el color.');
+    toast.show(failureMessage);
   }
+}
+
+function handleSwatchClick(code) {
+  return copyAndAnnounce(code, {
+    successMessage: `Copiado ${code}`,
+    failureMessage: 'No se pudo copiar el color.',
+  });
+}
+
+function handleCopyCssClick() {
+  return copyAndAnnounce(cssExportCode.textContent, {
+    successMessage: 'Variables CSS copiadas.',
+    failureMessage: 'No se pudieron copiar las variables CSS.',
+  });
 }
 
 function handleSizeChange(value) {
   colors = resizePalette(colors, Number(value));
-  renderPaletteGrid();
+  renderPaletteViews();
 }
 
 function handleFormatChange(value) {
   format = value;
-  renderPaletteGrid();
+  renderPaletteViews();
 }
 
 function handleLockToggle(index) {
@@ -151,7 +168,7 @@ function handleLockToggle(index) {
   }
 
   colors = toggleLock(colors, index);
-  renderPaletteGrid();
+  renderPaletteViews();
   focusLockButton(grid, index);
 }
 
@@ -167,7 +184,7 @@ function handleRestoreBatch(number) {
 
   colors = unlockAll(batch.colors);
   renderSizeOptions();
-  renderPaletteGrid();
+  renderPaletteViews();
 }
 
 function handleRequestDelete(number) {
@@ -198,10 +215,11 @@ function handleConfirmDelete(number) {
   saveBatchButton.focus();
 }
 
-function renderPaletteGrid(animateEntrance = false) {
+function renderPaletteViews(animateEntrance = false) {
   renderPalette(grid, colors, format, handleSwatchClick, handleLockToggle, animateEntrance);
   paletteSummary.textContent = describePalette(colors);
   renderContrastPanel(contrastList, colors);
+  cssExportCode.textContent = formatPaletteAsCss(colors, format);
 }
 
 function renderArchiveList() {
@@ -222,7 +240,7 @@ applyTheme(theme);
 renderThemeOptions();
 renderSizeOptions();
 renderFormatOptions();
-renderPaletteGrid();
+renderPaletteViews();
 renderArchiveList();
 updateTopbarMeta();
 setInterval(updateTopbarMeta, CLOCK_UPDATE_INTERVAL_MS);
@@ -246,12 +264,14 @@ generateButton.addEventListener('click', async () => {
     colors = regeneratePalette(colors);
     generationCount += 1;
     updateTopbarMeta();
-    renderPaletteGrid(ANIMATE_ENTRANCE);
+    renderPaletteViews(ANIMATE_ENTRANCE);
   } finally {
     isGenerating = false;
     setControlsDisabled(false);
   }
 });
+
+copyCssButton.addEventListener('click', handleCopyCssClick);
 
 saveBatchButton.addEventListener('click', () => {
   if (!archiveAvailable) {

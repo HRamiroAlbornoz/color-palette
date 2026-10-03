@@ -99,6 +99,13 @@ export function getSecondaryCode(hsl, hex, format) {
     : { label: 'HSL', value: `${hsl.hue} ${hsl.saturation} ${hsl.lightness}` };
 }
 
+export function formatPaletteAsCss(colors, format) {
+  const declarations = colors.map(
+    (color, index) => `  --color-${index + 1}: ${getPrimaryCode(color, hslToHex(color), format)};`,
+  );
+  return [':root {', ...declarations, '}'].join('\n');
+}
+
 function channelToLinear(channel) {
   const normalized = channel / 255;
   return normalized <= 0.03928 ? normalized / 12.92 : Math.pow((normalized + 0.055) / 1.055, 2.4);

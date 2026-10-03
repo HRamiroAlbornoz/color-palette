@@ -44,6 +44,10 @@
 
 .generate-button {
   grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   min-height: 48px;
   padding: 0 var(--space-5);
   background-color: var(--color-accent);
@@ -52,6 +56,22 @@
   font-weight: 600;
   font-size: 0.9375rem;
   transition: opacity var(--transition-fast);
+}
+
+.shortcut-hint {
+  display: none;
+  padding: 0 var(--space-1);
+  border: 1px solid color-mix(in srgb, currentColor 50%, transparent);
+  border-radius: var(--radius-inner);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .shortcut-hint {
+    display: inline-block;
+  }
 }
 
 .generate-button:hover {

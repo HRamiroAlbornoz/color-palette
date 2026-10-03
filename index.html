@@ -41,7 +41,14 @@
         </fieldset>
       </header>
       <section class="controls sidebar-region" aria-label="Controles de generación">
-        <button type="button" id="generate-button" class="generate-button">Generar paleta</button>
+        <button
+          type="button"
+          id="generate-button"
+          class="generate-button"
+          aria-keyshortcuts="Space"
+        >
+          Generar paleta <kbd class="shortcut-hint" aria-hidden="true">Espacio</kbd>
+        </button>
         <fieldset class="segmented" id="size-fieldset">
           <legend>Tamaño</legend>
           <div class="segmented-options" id="size-options"></div>

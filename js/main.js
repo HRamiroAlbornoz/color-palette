@@ -34,6 +34,7 @@ import {
   removeBatch,
   saveThemePreference,
 } from './storage.js';
+import { getSpaceShortcutAction, trackKeyboardFocus } from './shortcut.js';
 import { createToast } from './toast.js';
 
 const ANIMATE_ENTRANCE = true;
@@ -68,6 +69,7 @@ const skipLink = document.querySelector('#skip-link');
 const generationCounterDisplay = document.querySelector('#generation-counter');
 const topbarClock = document.querySelector('#topbar-clock');
 const toast = createToast(document.querySelector('#toast'));
+const focusCameFromKeyboard = trackKeyboardFocus(document);
 
 let colors = createPalette(PALETTE_SIZES[0]);
 let format = FORMAT_OPTIONS[0].value;
@@ -247,10 +249,14 @@ setInterval(updateTopbarMeta, CLOCK_UPDATE_INTERVAL_MS);
 
 skipLink.addEventListener('click', (event) => {
   event.preventDefault();
-  focusFirstSwatch(grid);
+  focusFirstSwatchAfterKeyActivation();
 });
 
-generateButton.addEventListener('click', async () => {
+async function generatePalette() {
+  if (isGenerating) {
+    return;
+  }
+
   if (isFullyLocked(colors)) {
     toast.show('Todos los colores están bloqueados: no hay nada para regenerar.');
     return;
@@ -269,7 +275,29 @@ generateButton.addEventListener('click', async () => {
     isGenerating = false;
     setControlsDisabled(false);
   }
-});
+}
+
+function focusFirstSwatchAfterKeyActivation() {
+  setTimeout(() => focusFirstSwatch(grid));
+}
+
+function handleShortcutKeydown(event) {
+  const action = getSpaceShortcutAction(event, {
+    focusCameFromKeyboard: focusCameFromKeyboard(),
+  });
+
+  if (action === 'ignore') {
+    return;
+  }
+
+  event.preventDefault();
+  if (action === 'generate') {
+    generatePalette();
+  }
+}
+
+generateButton.addEventListener('click', generatePalette);
+document.addEventListener('keydown', handleShortcutKeydown);
 
 copyCssButton.addEventListener('click', handleCopyCssClick);
 

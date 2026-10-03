@@ -59,7 +59,8 @@ input {
 }
 
 pre,
-code {
+code,
+kbd {
   font: inherit;
 }
 

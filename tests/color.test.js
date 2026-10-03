@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  HUE_MAX,
+  LIGHTNESS_MAX,
+  LIGHTNESS_MIN,
+  SATURATION_MAX,
+  SATURATION_MIN,
   createRandomHsl,
+  formatContrastRatio,
+  formatPaletteAsCss,
+  getContrastGrade,
   getContrastRatio,
   getPrimaryCode,
   getReadableTextColor,
@@ -152,5 +160,61 @@ describe('getReadableTextColor', () => {
     const result = getReadableTextColor({ r: 0, g: 0, b: 0 });
     expect(result.hex).toBe('#FFFFFF');
     expect(result.contrastRatio).toBeCloseTo(21, 5);
+  });
+
+  it('reaches at least 4.5:1 for every color the generator can produce, so no grade below AA exists', () => {
+    let lowestRatio = Infinity;
+    for (let hue = 0; hue < HUE_MAX; hue += 1) {
+      for (let saturation = SATURATION_MIN; saturation <= SATURATION_MAX; saturation += 1) {
+        for (let lightness = LIGHTNESS_MIN; lightness <= LIGHTNESS_MAX; lightness += 1) {
+          const { contrastRatio } = getReadableTextColor(hslToRgb({ hue, saturation, lightness }));
+          lowestRatio = Math.min(lowestRatio, contrastRatio);
+        }
+      }
+    }
+
+    expect(lowestRatio).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('formatPaletteAsCss', () => {
+  const colors = [
+    { hue: 210, saturation: 65, lightness: 57, locked: true },
+    { hue: 0, saturation: 100, lightness: 50, locked: false },
+  ];
+
+  it('declares one numbered variable per color inside :root, in palette order, as HEX', () => {
+    expect(formatPaletteAsCss(colors, 'hex')).toBe(
+      ':root {\n  --color-1: #4A91D9;\n  --color-2: #FF0000;\n}',
+    );
+  });
+
+  it('writes the values as hsl() when the active format is HSL', () => {
+    expect(formatPaletteAsCss(colors, 'hsl')).toBe(
+      ':root {\n  --color-1: hsl(210, 65%, 57%);\n  --color-2: hsl(0, 100%, 50%);\n}',
+    );
+  });
+});
+
+describe('getContrastGrade', () => {
+  it('grades 7:1 and above as AAA', () => {
+    expect(getContrastGrade(7)).toBe('AAA');
+    expect(getContrastGrade(21)).toBe('AAA');
+  });
+
+  it('grades from 4.5:1 up to just under 7:1 as AA', () => {
+    expect(getContrastGrade(4.5)).toBe('AA');
+    expect(getContrastGrade(6.99)).toBe('AA');
+  });
+});
+
+describe('formatContrastRatio', () => {
+  it('shows one decimal followed by :1', () => {
+    expect(formatContrastRatio(4.83)).toBe('4.8:1');
+    expect(formatContrastRatio(21)).toBe('21.0:1');
+  });
+
+  it('rounds down, so a ratio just under 7 never reads as 7.0:1 next to an AA grade', () => {
+    expect(formatContrastRatio(6.96)).toBe('6.9:1');
   });
 });

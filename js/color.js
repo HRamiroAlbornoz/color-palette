@@ -99,6 +99,13 @@ export function getSecondaryCode(hsl, hex, format) {
     : { label: 'HSL', value: `${hsl.hue} ${hsl.saturation} ${hsl.lightness}` };
 }
 
+export function formatPaletteAsCss(colors, format) {
+  const declarations = colors.map(
+    (color, index) => `  --color-${index + 1}: ${getPrimaryCode(color, hslToHex(color), format)};`,
+  );
+  return [':root {', ...declarations, '}'].join('\n');
+}
+
 function channelToLinear(channel) {
   const normalized = channel / 255;
   return normalized <= 0.03928 ? normalized / 12.92 : Math.pow((normalized + 0.055) / 1.055, 2.4);
@@ -114,6 +121,23 @@ export function getContrastRatio(rgbA, rgbB) {
   const lighter = Math.max(luminanceA, luminanceB);
   const darker = Math.min(luminanceA, luminanceB);
   return (lighter + 0.05) / (darker + 0.05);
+}
+
+const AAA_CONTRAST_RATIO = 7;
+
+export function getContrastGrade(contrastRatio) {
+  return contrastRatio >= AAA_CONTRAST_RATIO ? 'AAA' : 'AA';
+}
+
+export function formatContrastRatio(contrastRatio) {
+  return `${(Math.floor(contrastRatio * 10) / 10).toFixed(1)}:1`;
+}
+
+export function describeContrast(contrastRatio) {
+  return {
+    grade: getContrastGrade(contrastRatio),
+    ratioText: formatContrastRatio(contrastRatio),
+  };
 }
 
 export function getReadableTextColor(rgb) {

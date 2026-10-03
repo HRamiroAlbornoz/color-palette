@@ -1,4 +1,5 @@
 import {
+  describeContrast,
   getPrimaryCode,
   getReadableTextColor,
   getSecondaryCode,
@@ -90,6 +91,7 @@ function createSwatchElement(color, format, onSwatchClick, onLockToggle) {
   const rgb = hslToRgb(color);
   const hex = rgbToHex(rgb);
   const textColor = getReadableTextColor(rgb);
+  const contrast = describeContrast(textColor.contrastRatio);
   const primaryCode = getPrimaryCode(color, hex, format);
   const secondaryCode = getSecondaryCode(color, hex, format);
   const dataListId = `swatch-data-${nextSwatchId++}`;
@@ -115,7 +117,7 @@ function createSwatchElement(color, format, onSwatchClick, onLockToggle) {
   dataList.className = 'swatch-data';
   dataList.append(
     createDataEntry(secondaryCode.label, secondaryCode.value),
-    createDataEntry('AA', `${textColor.contrastRatio.toFixed(1)}:1`),
+    createDataEntry(contrast.grade, contrast.ratioText),
   );
 
   const details = document.createElement('div');
@@ -148,6 +150,39 @@ export function renderPalette(
       return swatch;
     }),
   );
+}
+
+function createTextSpan(className, text) {
+  const span = document.createElement('span');
+  span.className = className;
+  span.textContent = text;
+  return span;
+}
+
+function createContrastItem(color, position) {
+  const rgb = hslToRgb(color);
+  const textColor = getReadableTextColor(rgb);
+  const contrast = describeContrast(textColor.contrastRatio);
+
+  const sample = createTextSpan('contrast-sample', 'Aa');
+  sample.setAttribute('aria-hidden', 'true');
+  sample.style.backgroundColor = rgbToHex(rgb);
+  sample.style.color = textColor.hex;
+
+  const item = document.createElement('li');
+  item.className = 'contrast-item';
+  item.append(
+    sample,
+    createTextSpan('visually-hidden', `Color ${position}, contraste `),
+    createTextSpan('contrast-ratio', contrast.ratioText),
+    createTextSpan('visually-hidden', ', nota '),
+    createTextSpan('contrast-grade', contrast.grade),
+  );
+  return item;
+}
+
+export function renderContrastPanel(container, colors) {
+  container.replaceChildren(...colors.map((color, index) => createContrastItem(color, index + 1)));
 }
 
 export function focusLockButton(container, index) {
@@ -194,9 +229,7 @@ export function renderRadioOptions(container, { name, options, selected, onChang
       input.checked = value === selected;
       input.addEventListener('change', () => onChange(value));
 
-      const text = document.createElement('span');
-      text.className = 'option-text';
-      text.textContent = label;
+      const text = createTextSpan('option-text', label);
 
       const labelElement = document.createElement('label');
       labelElement.append(input);

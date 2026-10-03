@@ -6,6 +6,7 @@ import {
   focusFirstSwatch,
   markExitingSwatches,
   renderArchive,
+  renderContrastPanel,
   renderPalette,
   renderRadioOptions,
   renderTopbarMeta,
@@ -500,6 +501,53 @@ describe('renderRadioOptions with icons', () => {
     const label = container.querySelector('label');
     expect(label.querySelector('svg').getAttribute('aria-hidden')).toBe('true');
     expect(label.textContent).toBe('Oscuro');
+  });
+});
+
+describe('renderContrastPanel', () => {
+  const midBlue = { hue: 210, saturation: 65, lightness: 57, locked: false };
+  const paleYellow = { hue: 60, saturation: 70, lightness: 70, locked: false };
+
+  it('renders one item per color, in palette order, with an Aa sample painted like the swatch', () => {
+    const container = document.createElement('ul');
+
+    renderContrastPanel(container, [midBlue, paleYellow]);
+
+    const samples = container.querySelectorAll('.contrast-sample');
+    expect(samples).toHaveLength(2);
+    expect(samples[0].textContent).toBe('Aa');
+    expect(samples[0].style.backgroundColor).toBe('rgb(74, 145, 217)');
+    expect(samples[0].style.color).toBe('rgb(0, 0, 0)');
+  });
+
+  it('writes the ratio and the grade as text, not only as color', () => {
+    const container = document.createElement('ul');
+
+    renderContrastPanel(container, [midBlue, paleYellow]);
+
+    const [blueItem, yellowItem] = container.children;
+    expect(blueItem.querySelector('.contrast-ratio').textContent).toMatch(/^\d+\.\d:1$/);
+    expect(blueItem.querySelector('.contrast-grade').textContent).toBe('AA');
+    expect(yellowItem.querySelector('.contrast-grade').textContent).toBe('AAA');
+  });
+
+  it('reads as a sentence to assistive tech, with the decorative sample hidden', () => {
+    const container = document.createElement('ul');
+
+    renderContrastPanel(container, [midBlue]);
+
+    const item = container.firstElementChild;
+    expect(item.querySelector('.contrast-sample').getAttribute('aria-hidden')).toBe('true');
+    expect(item.textContent).toMatch(/^AaColor 1, contraste \d+\.\d:1, nota AA$/);
+  });
+
+  it('replaces the previous items when the palette changes', () => {
+    const container = document.createElement('ul');
+    renderContrastPanel(container, [midBlue, paleYellow, midBlue]);
+
+    renderContrastPanel(container, [paleYellow]);
+
+    expect(container.children).toHaveLength(1);
   });
 });
 

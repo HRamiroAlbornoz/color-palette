@@ -41,7 +41,14 @@
         </fieldset>
       </header>
       <section class="controls sidebar-region" aria-label="Controles de generación">
-        <button type="button" id="generate-button" class="generate-button">Generar paleta</button>
+        <button
+          type="button"
+          id="generate-button"
+          class="generate-button"
+          aria-keyshortcuts="Space"
+        >
+          Generar paleta <kbd class="shortcut-hint" aria-hidden="true">Espacio</kbd>
+        </button>
         <fieldset class="segmented" id="size-fieldset">
           <legend>Tamaño</legend>
           <div class="segmented-options" id="size-options"></div>
@@ -53,11 +60,31 @@
       </section>
       <main class="workspace">
         <ul class="palette-grid" id="palette-grid" role="list" aria-label="Paleta generada"></ul>
+        <section class="panel" aria-labelledby="contrast-title">
+          <div class="panel-header">
+            <h2 id="contrast-title">Contraste</h2>
+          </div>
+          <ul class="contrast-list" id="contrast-list" role="list"></ul>
+        </section>
+        <section class="panel" aria-labelledby="css-export-title">
+          <div class="panel-header">
+            <h2 id="css-export-title">Variables CSS</h2>
+            <button
+              type="button"
+              id="copy-css-button"
+              class="header-button"
+              aria-label="Copiar variables CSS"
+            >
+              Copiar
+            </button>
+          </div>
+          <pre class="css-export"><code id="css-export-code"></code></pre>
+        </section>
       </main>
       <section class="archive sidebar-region" aria-label="Archivo de paletas guardadas">
-        <div class="archive-header">
+        <div class="panel-header">
           <h2>Archivo</h2>
-          <button type="button" id="save-batch-button" class="save-button">Guardar lote</button>
+          <button type="button" id="save-batch-button" class="header-button">Guardar lote</button>
         </div>
         <ul class="archive-list" id="archive-list"></ul>
       </section>

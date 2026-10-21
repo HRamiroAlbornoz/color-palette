@@ -1,7 +1,7 @@
 ---
 author: HRamiroAlbornoz
 branch: chore/release-2-closure
-status: in-progress
+status: done
 ---
 # Documentación del Cierre del release 2
 
@@ -34,4 +34,4 @@ pendiente que ya se resolvió.
 
 ## Next
 
-Commit y PR del Cierre (los corre Hernán).
+Ninguno. Mergeado en `main` con el PR #13 el 2026-10-21 (`24f58cc`).

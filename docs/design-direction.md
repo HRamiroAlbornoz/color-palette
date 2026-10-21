@@ -47,7 +47,9 @@ entera como variables CSS.
 segmentados, archivo de lotes como tiras de color y el crédito del autor al pie. A la derecha,
 cabecera con «Generación Nº», conteo, hora y selector de tema; la paleta como banda continua con
 candado arriba y código, H/S/L y contraste al pie; debajo, panel de contraste y bloque de variables
-CSS. Por debajo de 1024px, todo apilado en una columna.
+CSS. Las tarjetas del panel de contraste usan las mismas columnas que la banda, así que cada una queda
+debajo de su color; por debajo de 1024px van en 3 columnas. Por debajo de 1024px, todo apilado en
+una columna.
 
 **Forma.** Estudio (propuesta C del lienzo de diseño del release 2).
 

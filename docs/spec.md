@@ -310,26 +310,59 @@ especificación responde **qué hace** la pantalla; ese archivo responde **cómo
 
 ## 9 · Flujos del recorrido
 
-Completado en el Cierre del release 1, recorriendo la aplicación publicada en producción
-(https://color-palette-alpha.vercel.app).
+Recorrido hecho en el Cierre del release 1 (2026-09-05) y repetido con las features nuevas en el
+Cierre del release 2 (2026-10-21), sobre la aplicación publicada en producción
+(https://color-palette-alpha.vercel.app). La evidencia del release 2, criterio por criterio, está en
+`02-DOCS/wiki/sdd/verifications/release-2-2026-10-21.md`.
 
 **Principal.** Generar paleta → bloquear dos colores → regenerar (los bloqueados no cambian) →
 cambiar tamaño → cambiar formato → copiar un color → guardar el lote → restaurar (el selector de
-tamaño se sincroniza) → borrar el lote con confirmación. Las seis features componen sin fricción:
-ninguna pisa el estado de la otra.
+tamaño se sincroniza) → borrar el lote con confirmación. Desde el release 2, el mismo camino suma:
+el resumen de la cabecera cuenta colores y bloqueados en el momento; el panel de contraste y el
+bloque de variables CSS se actualizan al generar, al cambiar el tamaño o el formato y al restaurar;
+«Copiar variables CSS» copia exactamente el texto que muestra el bloque; y la barra espaciadora
+genera igual que el botón. Las once features componen sin fricción: ninguna pisa el estado de otra.
+
+**Teclado.** El primer Tab muestra «Saltar a la paleta»; Enter lleva el foco a la primera muestra
+sin copiarla. Con el foco puesto ahí por teclado, Espacio copia el color; después de un clic con el
+mouse, Espacio genera. Tres Espacios seguidos durante la animación de salida generan una sola vez.
 
 **Usuario nuevo.** Al abrir la página sin datos previos: paleta de 6 colores ya generada, formato
-HEX, archivo vacío con el mensaje que explica cómo llenarlo. No hay pantalla en blanco en ningún
-punto de este camino.
+HEX, tema «Sistema», archivo vacío con el mensaje que explica cómo llenarlo. No hay pantalla en
+blanco en ningún punto de este camino.
 
 **Recuperación.** Recargar a mitad de una interacción (color bloqueado, tamaño cambiado) reinicia la
 paleta en pantalla —es la decisión tomada en la sección 2— pero el archivo de lotes guardados
 sobrevive intacto a la recarga, incluida la sincronización del tamaño al restaurar un lote después de
-recargar.
+recargar. El tema forzado también sobrevive, y la página ya lo tiene aplicado antes de pintar.
 
 **Error.** Portapapeles no disponible → aviso en lenguaje llano, nunca el error técnico.
 `localStorage` no disponible → el archivo lo explica y el resto de la app sigue funcionando. Un lote
 corrupto en `localStorage` (probado escribiendo un valor fuera de rango a mano) se descarta solo a
-él, sin perder los demás lotes guardados.
+él, sin perder los demás lotes guardados. Estos tres casos se recorrieron en el release 1; en el
+release 2 siguen cubiertos por los tests de `storage.js` y `clipboard.js`. Nuevo en el release 2: un
+valor de tema que no es una de las tres opciones —probado con un fragmento de HTML— vuelve a
+«Sistema» sin insertar nada en la página. Todo bloqueado → el botón y el atajo muestran el mismo
+aviso. Archivo lleno → el lote 13 se rechaza con el aviso de tope.
 
-Ningún bug de interacción entre features apareció en este recorrido.
+Ningún bug de interacción entre features apareció en el recorrido de ninguno de los dos releases.
+
+### Desviaciones del release 2
+
+Lo que se construyó distinto de lo que decían esta spec o el plan del release 2. Ninguna cambia un
+criterio de aceptación.
+
+1. **Cómo se distingue el foco de teclado del de mouse (F10.2).** El plan proponía usar
+   `:focus-visible`. No sirve: Chrome lo marca como verdadero al apretar una tecla, antes de que
+   corran los manejadores, así que un clic seguido de Espacio se leía como foco de teclado. Se
+   resolvió en `js/shortcut.js` con `trackKeyboardFocus`, que recuerda si la última entrada antes de
+   cada foco fue `pointerdown` o `keydown`.
+2. **Enter en «Saltar a la paleta» copiaba el primer color (F11.10).** La tecla que activaba el
+   enlace llegaba también al botón recién enfocado. Se corrigió en el PR #10, antes de publicar: el
+   foco se mueve en el turno siguiente, cuando la tecla ya terminó.
+3. **La nota de contraste de cada muestra.** Al principio mostraba siempre «AA». Ahora muestra la
+   nota real, «AA» o «AAA», con la misma regla que el panel de contraste (F8.2).
+
+Además, en el Cierre se ajustaron dos detalles que la spec no fijaba: el panel de contraste usa las
+mismas columnas que la banda, así que ninguna tarjeta queda sola en la última fila, y la página
+tiene un ícono propio en la pestaña.

@@ -1,7 +1,7 @@
 ---
 author: HRamiroAlbornoz
 branch: chore/release-2-closure
-status: in-progress
+status: done
 ---
 # Tests de main.js
 
@@ -42,4 +42,4 @@ Hallazgo should-fix de `02-DOCS/wiki/sdd/reviews/release-2.md`.
 
 ## Next
 
-Commit (lo corre Hernán) y seguir con el arreglo 3: favicon y panel de contraste.
+Ninguno. Mergeado en `main` con el PR #13 el 2026-10-21 (`24f58cc`).

@@ -1,7 +1,7 @@
 ---
 author: HRamiroAlbornoz
 branch: chore/release-2-closure
-status: in-progress
+status: done
 ---
 # README y meta description
 
@@ -36,4 +36,4 @@ salen sin texto. Hallazgos should-fix de `02-DOCS/wiki/sdd/reviews/release-2.md`
 
 ## Next
 
-Commit y PR de la rama `chore/release-2-closure` (los corre Hernán).
+Ninguno. Mergeado en `main` con el PR #13 el 2026-10-21 (`24f58cc`).

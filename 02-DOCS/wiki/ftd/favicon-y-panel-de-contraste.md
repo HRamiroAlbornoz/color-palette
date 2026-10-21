@@ -1,7 +1,7 @@
 ---
 author: HRamiroAlbornoz
 branch: chore/release-2-closure
-status: in-progress
+status: done
 ---
 # Favicon y panel de contraste alineado con la banda
 
@@ -45,4 +45,6 @@ contra el «nada flota» de `docs/design-direction.md`.
 
 ## Next
 
-Commit (lo corre Hernán). Después, abrir el PR del Cierre.
+Ninguno. Mergeado en `main` con el PR #13 el 2026-10-21 (`24f58cc`); verificado también en el
+preview de Vercel (panel en una fila con 9 colores a 1920px, sin errores en consola, ícono visible
+en la pestaña).

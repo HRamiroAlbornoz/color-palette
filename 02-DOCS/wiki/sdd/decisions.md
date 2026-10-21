@@ -45,3 +45,19 @@ Las decisiones anteriores a este registro están en `docs/adr/` (ADR 0001 a 0003
 - **Motivo:** Hernán dejó de usar la herramienta, pero la dirección visual del release 2 sigue
   vigente y es la referencia de cualquier cambio de interfaz. La carpeta `.impeccable/` se borra;
   su historial queda en git.
+
+## 2026-10-21 · Columnas del panel de contraste
+
+- **Opciones:** las mismas columnas que la banda; llenar por ancho sin dejar una tarjeta sola; dejar
+  el `auto-fit` y aceptar la tarjeta sola.
+- **Elegida:** las mismas columnas que la banda (3 por debajo de 1024px).
+- **Motivo:** la dirección visual pide que nada flote y que cada posición se lea contra una única
+  división. Alineada con la banda, cada tarjeta queda debajo de su color y la última fila sigue la
+  misma regla que la paleta. Se resuelve solo con CSS, con `:has()` sobre el `data-count` de la banda.
+
+## 2026-10-21 · Favicon embebido
+
+- **Opciones:** SVG embebido en el `<link rel="icon">`; archivo `favicon.svg` sumado a la lista
+  blanca de `.vercelignore`.
+- **Elegida:** SVG embebido: fondo grafito y tres franjas de color.
+- **Motivo:** no agrega un archivo ni un pedido de red, y no exige tocar `.vercelignore`.

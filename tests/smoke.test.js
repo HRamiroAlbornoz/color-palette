@@ -20,6 +20,10 @@ describe('index.html', () => {
     expect(indexHtml).toMatch(/<title>.+<\/title>/);
   });
 
+  it('embeds its own SVG icon, so the browser never requests a missing favicon.ico', () => {
+    expect(indexHtml).toMatch(/<link\s+rel="icon"\s+href="data:image\/svg\+xml,[^"]+"/);
+  });
+
   it('describes the page for search results and link previews', () => {
     const description = indexHtml.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1];
 

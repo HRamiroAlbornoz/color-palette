@@ -295,7 +295,7 @@ tarea, no a ser persuadido.
 | Estado de error | En el aviso emergente: portapapeles no disponible, `localStorage` no disponible, tope de archivo alcanzado, y nada para regenerar. Una preferencia de tema ilegible no es un error visible: se vuelve a «Sistema» en silencio (F7.7) |
 
 El plan de diseño de esta superficie —tipografía, paleta de interfaz, composición e interacción
-distintiva— vive en `.impeccable/surfaces/index-html.md`, bajo `## Direction contract`. Esta
+distintiva— vive en [`design-direction.md`](design-direction.md). Esta
 especificación responde **qué hace** la pantalla; ese archivo responde **cómo se ve**.
 
 ---

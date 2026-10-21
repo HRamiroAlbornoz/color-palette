@@ -1,65 +1,112 @@
 ---
 type: constitution
-title: color-palette — Constitution
-description: Draft written by rsc onboard from the accepted plan; not ratified.
+title: color-palette — Constitución
+description: Los principios no negociables que obedece cada fase de rsc-sdd.
 tags: [sdd, constitution]
-timestamp: 2026-10-21T21:31:31Z
+timestamp: 2026-10-21T22:30:00Z
 topic: sdd
-status: draft
-version: draft
+version: v1.0.0
 ---
 
-# color-palette — Constitution
+# color-palette — Constitución
 
-> **borrador — complétalo con la fase `constitution` antes del primer SDD.**
-> Draft: complete it with the `constitution` phase before the first SDD feature. It holds only what
-> onboarding knew; it ratifies no principle. Ratifying it removes `status: draft` and starts at v1.0.0.
+> Versión: v1.0.0 · Ratificada: 2026-10-21 · Última enmienda: —
+> Los principios no negociables que obedece cada fase de rsc-sdd. Qué hace la aplicación vive en
+> `docs/spec.md`; cómo se ve, en `docs/design-direction.md`. Este archivo ratifica el
+> principio y enlaza el detalle.
 
-## Known facts (from onboarding)
+## 1. Canon del stack
 
-- Goal: Una paleta de colores para uso profesional
-- Project kind: mixed · software scope: growing
-- How code changes land: branches closed with a pull request; the default branch is closed to direct work (`--workflow branches`).
-- Stack evidence: Detected at install: node (from package.json). Not ratified yet.
+1. HTML, CSS y JavaScript vanilla con ES modules nativos, sin framework y sin build step: los
+   archivos que se editan son los que se sirven. `package.json` no tiene script `build`.
+   Detalle: `docs/adr/0001-javascript-vanilla-sin-framework-ni-build.md`.
+2. Cero dependencias de producción: `package.json` no tiene `dependencies`, solo
+   `devDependencies` (ESLint, Prettier, Vitest, jsdom). Agregar una es enmienda MAJOR y exige una
+   decisión registrada que reemplace al ADR 0001.
+3. CSS plano con custom properties, sin Tailwind ni preprocesadores.
+4. Node según `.nvmrc`, solo para las herramientas. npm con `package-lock.json` commiteado; el CI
+   instala con `npm ci`.
 
-## 1. Stack canon
+## 2. Barra de calidad
 
-Detected at install: node (from package.json). Not ratified yet.
+5. `npm run lint` y `npm run format:check` pasan sin errores. Lo exige el job `quality` del CI,
+   que es check obligatorio para mergear en `main`.
+6. No hay type checker: el código no lleva tipos (ADR 0001). Su lugar lo ocupan los tests y el lint.
+7. TDD estricto: cada tarea de código empieza con un test que falla (rojo), sigue con el código
+   mínimo que lo pasa (verde) y termina con el refactor. La evidencia queda en el registro de
+   progreso de la fase `implement`.
+8. Cada módulo de `js/` tiene su `tests/<módulo>.test.js`, y cada criterio de aceptación de
+   `docs/spec.md` que se pueda verificar en código tiene al menos un test. `npm test` pasa.
 
-## 2. Quality bar
+## 3. Convenciones
 
-_Pending — to be completed in the `constitution` phase._
+9. El código no lleva comentarios. Si una función necesita explicación, se renombra.
+10. Commits en inglés y en modo imperativo, sin gitmoji ni prefijos de Conventional Commits.
+11. `js/storage.js` es el único módulo que lee y escribe `localStorage`, salvo la excepción
+    documentada del script de tema en el `<head>` (`docs/spec.md`, restricción 3). Los datos
+    leídos se validan a mano antes de usarse, sin Zod (`docs/adr/0003-validacion-manual-de-localstorage.md`).
 
-## 3. Conventions
+## 4. Ramas y publicación
 
-_Pending — to be completed in the `constitution` phase._
+12. Una rama por feature, creada desde `main`, con prefijo `feature/`, `fix/` o `chore/`. Entra
+    solo por Pull Request con el CI en verde y se mergea desde la interfaz de GitHub. `main` está
+    protegida: sin push directo y sin force push, también para administradores.
+13. **La autoría de git es humana.** Commits y PRs son de Hernán: sin `Co-Authored-By` de una IA y
+    sin pie «generated with». Los comandos de git que escriben, los de `gh` que tocan el remoto y
+    los que instalan dependencias los corre Hernán.
+14. Vercel es el único proveedor. Cada PR se verifica en su deploy de preview antes del merge.
+    `vercel.json` declara `outputDirectory` y no `buildCommand`, y `.vercelignore` funciona como
+    lista blanca.
 
-## 4. Branching & shipping
+## 5. Piso de seguridad y privacidad
 
-Chosen at install: branches closed with a pull request; the default branch is closed to direct work. _Pending — to be completed in the `constitution` phase._
+15. No se commitea ningún secreto. Si alguna herramienta lo necesita, va en
+    `01-TOOLS/<proveedor>/.env`, que está gitignorado.
+16. La aplicación no hace pedidos a terceros: tipografías autoalojadas, sin CDN y sin analytics.
+    El único enlace externo es el crédito al repositorio.
+17. Ningún dato dinámico se inserta como HTML: se usa `textContent` o se crean nodos, nunca
+    `innerHTML`. Si se agrega una Content-Security-Policy, el script inline se autoriza por hash y
+    nunca con `'unsafe-inline'` (`docs/spec.md`, restricción 6).
 
-## 5. Security & privacy floor
+## 6. Piso de accesibilidad e interfaz
 
-_Pending — to be completed in the `constitution` phase._
+18. Todo texto cumple el contraste WCAG 2.2 AA en ambos temas, incluido el texto superpuesto a un
+    color aleatorio. Todo control se alcanza con el teclado y tiene foco visible. Con
+    `prefers-reduced-motion: reduce` no hay animaciones de entrada. Detalle: `docs/spec.md`, F6, F7 y F11.
+19. Mobile-first: la interfaz funciona desde 320px de ancho sin scroll horizontal.
+20. Todo cambio visual se revisa contra `docs/design-direction.md`, sin herramientas externas de
+    diseño. Si la interfaz construida se aparta del documento, el documento se actualiza en el
+    mismo PR. Su contenido no se copia al código ni a ningún archivo que llegue al navegador.
 
-## 6. UX / accessibility floor (if there is a UI)
+## 7. Presupuesto de rendimiento
 
-_Pending — to be completed in the `constitution` phase._
+21. El rendimiento se garantiza por construcción: sin build, sin dependencias de producción y sin
+    pedidos de red fuera del propio origen (principios 1, 2 y 16). Las fuentes son `.woff2`
+    precargadas con `font-display: swap`. No se muestra un estado de carga falso.
 
-## 7. Performance budgets (where they matter)
+## 8. Conocimiento y decisiones
 
-_Pending — to be completed in the `constitution` phase._
+22. Toda decisión significativa se agrega a `02-DOCS/wiki/sdd/decisions.md` con fecha, opciones y
+    motivo. Los ADR 0001 a 0003 de `docs/adr/` siguen vigentes como historial. Una decisión que
+    reemplace a uno de ellos se registra en `decisions.md` y lo cita. Esta constitución es el
+    registro de decisiones de mayor rango.
 
-## 8. Knowledge & decisions
+## Definición de terminado (la barra que corre `verify`)
 
-_Pending — to be completed in the `constitution` phase._
+Un cambio se publica solo si se cumple todo:
 
-## Definition of Done (the merge bar `verify` runs against)
+- [ ] Lint y Prettier limpios (principio 5).
+- [ ] TDD seguido y tests en verde; módulo y criterios cubiertos (principios 7 y 8).
+- [ ] Sin dependencias de producción ni build step nuevos (principios 1 a 3).
+- [ ] Sin comentarios, commits en inglés imperativo y `localStorage` solo vía `storage.js` (principios 9 a 11).
+- [ ] En rama propia, por PR con CI en verde, con autoría humana y verificado en el preview de Vercel (principios 12 a 14).
+- [ ] Sin secretos, sin pedidos a terceros y sin `innerHTML` con datos (principios 15 a 17).
+- [ ] Contraste AA, teclado, foco, movimiento reducido y 320px; dirección visual auditada (principios 18 a 20).
+- [ ] Decisiones significativas registradas (principio 22).
 
-_Pending — to be completed in the `constitution` phase._
+## Registro de enmiendas (solo se agregan filas)
 
-## Amendment log (append-only)
-
-| Date | Version | Change | Why |
-|------|---------|--------|-----|
-| 2026-10-21 | draft | Draft generated by `rsc onboard`. | The SDD floor needs a constitution; ratification is the `constitution` phase's. |
+| Fecha | Versión | Cambio | Motivo |
+|-------|---------|--------|--------|
+| 2026-10-21 | draft | Borrador generado por `rsc onboard`. | El piso SDD necesita una constitución; ratificarla le corresponde a la fase `constitution`. |
+| 2026-10-21 | v1.0.0 | Ratificada con 22 principios. El principio 20 revisa contra `docs/design-direction.md` en lugar de Impeccable. | Hernán aprobó la propuesta y dejó de usar Impeccable. |

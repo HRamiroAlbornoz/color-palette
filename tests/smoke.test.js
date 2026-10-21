@@ -20,6 +20,13 @@ describe('index.html', () => {
     expect(indexHtml).toMatch(/<title>.+<\/title>/);
   });
 
+  it('describes the page for search results and link previews', () => {
+    const description = indexHtml.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1];
+
+    expect(description?.trim().length).toBeGreaterThanOrEqual(50);
+    expect(description.length).toBeLessThanOrEqual(160);
+  });
+
   it('links the design tokens and base stylesheets', () => {
     expect(indexHtml).toMatch(/href="css\/tokens\.css"/);
     expect(indexHtml).toMatch(/href="css\/base\.css"/);

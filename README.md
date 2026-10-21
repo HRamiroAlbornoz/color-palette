@@ -6,7 +6,7 @@ hasta que la paleta cierra, y llevarse los códigos.
 
 Sin servidor, sin cuentas y sin red: todo ocurre en el navegador.
 
-> **Estado:** en desarrollo. El enlace a la demo se publica al cerrar el primer release.
+**Demo:** [color-palette-alpha.vercel.app](https://color-palette-alpha.vercel.app)
 
 ---
 
@@ -18,6 +18,13 @@ Sin servidor, sin cuentas y sin red: todo ocurre en el navegador.
 - **Copia el código al portapapeles** con un clic sobre el color, con confirmación visible.
 - **Bloquea colores individualmente**: al regenerar, los bloqueados se conservan.
 - **Archiva hasta 12 paletas** en el navegador, con restaurar y borrar.
+- Muestra un **panel de contraste** con el ratio y la nota WCAG (AA o AAA) de cada color.
+- **Exporta la paleta como variables CSS** (`--color-1`, `--color-2`…) lista para copiar.
+- Genera con la **barra espaciadora**, sin pisar el comportamiento de los controles.
+- Ofrece **tema claro, oscuro o el del sistema**, y recuerda la elección.
+
+La interfaz es un espacio de trabajo: barra lateral con los controles y el archivo, y la paleta como
+una banda continua en el centro. En pantallas angostas todo se apila en una columna.
 
 El detalle completo, con criterios de aceptación verificables, está en
 [`docs/spec.md`](docs/spec.md).
@@ -26,7 +33,8 @@ El detalle completo, con criterios de aceptación verificables, está en
 
 ## Cómo ejecutarlo
 
-Necesitás [Node.js](https://nodejs.org/) 20 o superior, únicamente para las herramientas de calidad.
+Necesitás [Node.js](https://nodejs.org/) 24 (la versión fijada en `.nvmrc`), únicamente para las
+herramientas de calidad.
 La aplicación en sí no lo necesita.
 
 ```bash
@@ -55,8 +63,10 @@ protocolo `file://` y la función de copiado no está disponible.
 
 ## Decisiones técnicas
 
-Las decisiones caras de revertir están documentadas una por archivo en
-[`docs/adr/`](docs/adr/). En resumen:
+Las decisiones fundacionales están documentadas una por archivo en [`docs/adr/`](docs/adr/); las
+posteriores, en el [registro de decisiones](02-DOCS/wiki/sdd/decisions.md). Las reglas que todo
+cambio debe cumplir están en la [constitución del proyecto](02-DOCS/wiki/sdd/constitution.md). En
+resumen:
 
 **Sin framework, sin bundler y sin paso de compilación.** Los archivos que se editan son exactamente
 los que se sirven. El proyecto tiene una sola pantalla, sin rutas ni estado compartido: el costo de
@@ -80,14 +90,16 @@ Vitest, jsdom) y ninguna llega al navegador del usuario.
 
 ## Accesibilidad
 
-El proyecto apunta a **WCAG 2.1 nivel AA**:
+El proyecto apunta a **WCAG 2.2 nivel AA**:
 
 - Contraste suficiente en todo texto, incluido el que se superpone a un color generado al azar: el
   color de ese texto se calcula según la luminancia del fondo.
-- Navegación completa por teclado con foco visible. Ningún control es accesible solo por hover.
+- Navegación completa por teclado con foco visible. Ningún control es accesible solo por hover. Un
+  enlace «Saltar a la paleta» evita recorrer el archivo antes de llegar a los colores.
 - Controles agrupados y etiquetados; la confirmación de copiado se anuncia a lectores de pantalla.
 - Ningún estado se comunica únicamente con color.
-- Se respetan `prefers-color-scheme` y `prefers-reduced-motion`.
+- El tema sigue a `prefers-color-scheme` hasta que el usuario elige uno, y nunca muestra un instante
+  el tema equivocado al recargar. Con `prefers-reduced-motion` no hay animaciones.
 
 ---
 
@@ -110,10 +122,14 @@ index.html          única pantalla
 css/                tokens, base y componentes
 js/                 módulos de una responsabilidad cada uno
 tests/              suite de Vitest
-docs/               especificación y decisiones de arquitectura
+docs/               especificación, dirección visual y ADRs
+02-DOCS/            constitución, decisiones y registros del flujo de desarrollo
 ```
 
-`js/storage.js` es el único módulo que accede a `localStorage`. Ningún otro archivo lo toca.
+`js/storage.js` es el único módulo que lee y escribe `localStorage`. La única excepción es un script
+de pocas líneas en el `<head>` que lee el tema guardado antes de pintar la página, para que no
+aparezca un instante el tema equivocado; solo lee, y valida el valor contra las mismas opciones que
+define `storage.js`.
 
 ---
 

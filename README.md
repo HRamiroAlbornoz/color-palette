@@ -103,6 +103,23 @@ El proyecto apunta a **WCAG 2.2 nivel AA**:
 
 ---
 
+## Cómo se trabaja
+
+- **Reglas escritas antes del código.** La [constitución](02-DOCS/wiki/sdd/constitution.md) fija lo
+  que ningún cambio puede romper: stack, calidad, accesibilidad, seguridad y rendimiento.
+- **Tests primero.** Cada cambio de código empieza con un test que falla; recién después se escribe
+  el código que lo hace pasar.
+- **Una rama y un Pull Request por cambio.** `main` está protegida: nada entra sin lint, formato y
+  tests en verde en GitHub Actions.
+- **Verificación en un navegador real.** Cada criterio de la [especificación](docs/spec.md) se prueba
+  sobre el sitio publicado, en varios anchos y en los dos temas, y queda registrado con su evidencia
+  ([verificación del release 2](02-DOCS/wiki/sdd/verifications/release-2-2026-10-21.md)).
+- **Revisión antes del merge.** El código se revisa contra la spec y la constitución
+  ([revisión del release 2](02-DOCS/wiki/sdd/reviews/release-2.md)), y cada decisión importante se
+  anota en el [registro de decisiones](02-DOCS/wiki/sdd/decisions.md).
+
+---
+
 ## Cómo se despliega
 
 El sitio se publica en **Vercel** como sitio estático, sin build.
@@ -130,6 +147,13 @@ docs/               producto, especificación, dirección visual y ADRs
 de pocas líneas en el `<head>` que lee el tema guardado antes de pintar la página, para que no
 aparezca un instante el tema equivocado; solo lee, y valida el valor contra las mismas opciones que
 define `storage.js`.
+
+---
+
+## Licencia
+
+[MIT](LICENSE). Las tipografías Geist y Geist Mono se distribuyen bajo su propia licencia,
+[SIL Open Font License 1.1](fonts/OFL.txt).
 
 ---
 

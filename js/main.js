@@ -313,6 +313,10 @@ document.addEventListener('keydown', handleShortcutKeydown);
 copyCssButton.addEventListener('click', handleCopyCssClick);
 
 saveBatchButton.addEventListener('click', () => {
+  if (isGenerating) {
+    return;
+  }
+
   if (!archiveAvailable) {
     toast.show('En este navegador no se puede guardar el archivo de paletas.');
     return;

@@ -131,6 +131,17 @@ describe('main.js', () => {
     expect(document.querySelector('#palette-summary').textContent).toBe('8 colores · 0 bloqueados');
   });
 
+  it('ignores Guardar lote while a generation is still running, like restoring and locking', async () => {
+    await startApp();
+
+    document.querySelector('#generate-button').click();
+    document.querySelector('#save-batch-button').click();
+    await waitForPendingWork();
+
+    expect(generationNumber()).toBe('2');
+    expect(document.querySelectorAll('#archive-list > .batch-entry')).toHaveLength(0);
+  });
+
   it('refuses to save a 13th batch and tells the user to delete one first', async () => {
     await startApp();
     const saveButton = document.querySelector('#save-batch-button');

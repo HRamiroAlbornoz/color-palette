@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -68,5 +69,35 @@ describe('index.html', () => {
 
   it('does not hardcode any radio; size options come from PALETTE_SIZES via renderRadioOptions', () => {
     expect(indexHtml).not.toMatch(/type="radio"/);
+  });
+});
+
+describe('security headers in vercel.json', () => {
+  const vercelConfig = JSON.parse(readFileSync(join(currentDir, '..', 'vercel.json'), 'utf-8'));
+  const headersForEveryRoute = Object.fromEntries(
+    (vercelConfig.headers ?? [])
+      .filter(({ source }) => source === '/(.*)')
+      .flatMap(({ headers }) => headers)
+      .map(({ key, value }) => [key, value]),
+  );
+  const contentSecurityPolicy = headersForEveryRoute['Content-Security-Policy'] ?? '';
+  const inlineScript = indexHtml.match(/<script>([\s\S]*?)<\/script>/)[1];
+  const inlineScriptHash = createHash('sha256').update(inlineScript, 'utf-8').digest('base64');
+
+  it('authorizes the inline theme script by its exact hash, never with unsafe-inline', () => {
+    expect(contentSecurityPolicy).toContain(`script-src 'self' 'sha256-${inlineScriptHash}'`);
+    expect(contentSecurityPolicy).not.toContain('unsafe-inline');
+    expect(contentSecurityPolicy).not.toContain('unsafe-eval');
+  });
+
+  it('only lets the page load resources from its own origin', () => {
+    expect(contentSecurityPolicy).toContain("default-src 'self'");
+    expect(contentSecurityPolicy).not.toMatch(/https?:/);
+  });
+
+  it('forbids embedding the page in another site and guessing content types', () => {
+    expect(contentSecurityPolicy).toContain("frame-ancestors 'none'");
+    expect(headersForEveryRoute['X-Frame-Options']).toBe('DENY');
+    expect(headersForEveryRoute['X-Content-Type-Options']).toBe('nosniff');
   });
 });

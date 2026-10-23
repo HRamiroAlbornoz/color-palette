@@ -90,6 +90,18 @@ describe('loadArchive', () => {
     });
   });
 
+  it('keeps only the first batch of each number, so deleting one batch never takes another with it', () => {
+    const firstBatch = { number: 1, date: new Date().toISOString(), colors: makeColors(6) };
+    const repeatedNumber = { number: 1, date: new Date().toISOString(), colors: makeColors(8) };
+    const otherBatch = { number: 2, date: new Date().toISOString(), colors: makeColors(9) };
+    localStorage.setItem(
+      'colorfly-palette-archive',
+      JSON.stringify({ batches: [firstBatch, repeatedNumber, otherBatch] }),
+    );
+
+    expect(loadArchive()).toEqual({ available: true, batches: [firstBatch, otherBatch] });
+  });
+
   it('reports the archive as unavailable when localStorage cannot be read', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('storage disabled');

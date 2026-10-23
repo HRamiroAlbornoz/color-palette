@@ -59,6 +59,17 @@ function isValidArchiveShape(data) {
   return isRecord(data) && Array.isArray(data.batches);
 }
 
+function keepFirstBatchOfEachNumber(batches) {
+  const seenNumbers = new Set();
+  return batches.filter((batch) => {
+    if (seenNumbers.has(batch.number)) {
+      return false;
+    }
+    seenNumbers.add(batch.number);
+    return true;
+  });
+}
+
 export function loadArchive() {
   let raw;
   try {
@@ -73,7 +84,9 @@ export function loadArchive() {
 
   try {
     const parsed = JSON.parse(raw);
-    const batches = isValidArchiveShape(parsed) ? parsed.batches.filter(isValidBatch) : [];
+    const batches = isValidArchiveShape(parsed)
+      ? keepFirstBatchOfEachNumber(parsed.batches.filter(isValidBatch))
+      : [];
     return { available: true, batches };
   } catch {
     return { available: true, batches: [] };

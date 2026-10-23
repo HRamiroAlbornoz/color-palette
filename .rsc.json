@@ -13,6 +13,7 @@
     "debug",
     "decision-challenge",
     "deprecation",
+    "design",
     "fable-operator",
     "ftd",
     "harness",
@@ -44,10 +45,11 @@
     "refuter-tests"
   ],
   "ownSkills": [],
-  "catalogVersion": "3.1.4",
+  "catalogVersion": "3.3.0",
   "tier": null,
   "optOuts": [
     "auto-update",
+    "gitmoji",
     "knowledge-sync",
     "trunk-open"
   ],

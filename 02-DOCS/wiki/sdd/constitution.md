@@ -5,12 +5,12 @@ description: Los principios no negociables que obedece cada fase de rsc-sdd.
 tags: [sdd, constitution]
 timestamp: 2026-10-21T22:30:00Z
 topic: sdd
-version: v1.0.0
+version: v2.0.0
 ---
 
 # color-palette — Constitución
 
-> Versión: v1.0.0 · Ratificada: 2026-10-21 · Última enmienda: —
+> Versión: v2.0.0 · Ratificada: 2026-10-21 · Última enmienda: 2026-10-23
 > Los principios no negociables que obedece cada fase de rsc-sdd. Qué hace la aplicación vive en
 > `docs/spec.md`; cómo se ve, en `docs/design-direction.md`. Este archivo ratifica el
 > principio y enlaza el detalle.
@@ -74,9 +74,17 @@ version: v1.0.0
     color aleatorio. Todo control se alcanza con el teclado y tiene foco visible. Con
     `prefers-reduced-motion: reduce` no hay animaciones de entrada. Detalle: `docs/spec.md`, F6, F7 y F11.
 19. Mobile-first: la interfaz funciona desde 320px de ancho sin scroll horizontal.
-20. Todo cambio visual se revisa contra `docs/design-direction.md`, sin herramientas externas de
+20. ~~Todo cambio visual se revisa contra `docs/design-direction.md`, sin herramientas externas de
     diseño. Si la interfaz construida se aparta del documento, el documento se actualiza en el
-    mismo PR. Su contenido no se copia al código ni a ningún archivo que llegue al navegador.
+    mismo PR. Su contenido no se copia al código ni a ningún archivo que llegue al navegador.~~
+    *Reemplazado por el principio 23 en v2.0.0.*
+23. Todo cambio visual pasa por la skill `design` de RSC, en modo **Operate**. La identidad
+    existente gana: `docs/design-direction.md` y `css/tokens.css` fijan colores y tipografías
+    (`--keep palette,type`), y la skill solo propone la composición. Su verificación (`lint.mjs` e
+    `inspect.mjs` a 1440, 768 y 390px) termina sin ningún `FAIL`, y el sistema construido queda
+    registrado en `DESIGN.md`. Si la interfaz se aparta de `docs/design-direction.md`, el documento
+    se actualiza en el mismo PR. Ni ese documento ni `DESIGN.md` se copian a archivos que lleguen al
+    navegador, y toda imagen que la skill agregue se sirve desde el propio origen (principio 16).
 
 ## 7. Presupuesto de rendimiento
 
@@ -101,7 +109,7 @@ Un cambio se publica solo si se cumple todo:
 - [ ] Sin comentarios, commits en inglés imperativo y `localStorage` solo vía `storage.js` (principios 9 a 11).
 - [ ] En rama propia, por PR con CI en verde, con autoría humana y verificado en el preview de Vercel (principios 12 a 14).
 - [ ] Sin secretos, sin pedidos a terceros y sin `innerHTML` con datos (principios 15 a 17).
-- [ ] Contraste AA, teclado, foco, movimiento reducido y 320px; dirección visual auditada (principios 18 a 20).
+- [ ] Contraste AA, teclado, foco, movimiento reducido y 320px; cambios visuales por la skill `design` sin `FAIL` (principios 18, 19 y 23).
 - [ ] Decisiones significativas registradas (principio 22).
 
 ## Registro de enmiendas (solo se agregan filas)
@@ -110,3 +118,4 @@ Un cambio se publica solo si se cumple todo:
 |-------|---------|--------|--------|
 | 2026-10-21 | draft | Borrador generado por `rsc onboard`. | El piso SDD necesita una constitución; ratificarla le corresponde a la fase `constitution`. |
 | 2026-10-21 | v1.0.0 | Ratificada con 22 principios. El principio 20 revisa contra `docs/design-direction.md` en lugar de Impeccable. | Hernán aprobó la propuesta y dejó de usar Impeccable. |
+| 2026-10-23 | v2.0.0 | Principio 20 tachado; se agrega el 23: los cambios visuales pasan por la skill `design` de RSC, con la identidad existente como base. | RSC 3.3.0 instala `design` en todo proyecto y la vuelve a poner en cada `sync`; Hernán eligió adoptarla en lugar de pelear con ella. Revierte una regla, por eso sube la versión mayor. |

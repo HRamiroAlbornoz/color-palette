@@ -75,9 +75,12 @@ verifican los criterios de aceptación en el paso 7 del ciclo.
 ## Herramientas específicas
 
 - **Impeccable ya no se usa** (decisión del 2026-10-21 en `02-DOCS/wiki/sdd/decisions.md`). La
-  dirección visual vive en `docs/design-direction.md` y es lo que audita la revisión de cierre. **No
-  copiar ese documento dentro del código ni de ningún archivo que llegue al navegador.**
-- **RSC** gobierna el flujo de desarrollo. Sus fases leen primero la constitución.
+  dirección visual vive en `docs/design-direction.md`. **No copiar ese documento dentro del código ni
+  de ningún archivo que llegue al navegador.**
+- **RSC** (versión 3.3.0) gobierna el flujo de desarrollo. Sus fases leen primero la constitución.
+- **Diseño: la skill `design` de RSC** (principio 23 de la constitución), en modo **Operate**. Antes
+  de proponer nada, toma la identidad existente de `docs/design-direction.md` y `css/tokens.css`
+  (`--keep palette,type`). Al terminar, el sistema queda registrado en `DESIGN.md`, en la raíz.
 
 ### Knowledge map
 

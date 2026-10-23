@@ -61,3 +61,15 @@ Las decisiones anteriores a este registro están en `docs/adr/` (ADR 0001 a 0003
   blanca de `.vercelignore`.
 - **Elegida:** SVG embebido: fondo grafito y tres franjas de color.
 - **Motivo:** no agrega un archivo ni un pedido de red, y no exige tocar `.vercelignore`.
+
+## 2026-10-23 · RSC 3.3.0 y la skill `design`
+
+- **Opciones:** quedarse en RSC 3.1.4; actualizar y quitar `design`; actualizar y bloquear `design`
+  con una regla; actualizar y adoptar `design`.
+- **Elegida:** actualizar a 3.3.0 y adoptar `design` (constitución v2.0.0, principio 23).
+- **Motivo:** en 3.3.0, `design` forma parte del piso de skills obligatorias. `rsc sync` la vuelve a
+  instalar aunque se la desinstale, y `rsc doctor` la reporta como faltante, así que quitarla no
+  era sostenible. Se adopta con la identidad existente como base: `docs/design-direction.md` y
+  `css/tokens.css` fijan colores y tipografías, y la skill aporta la composición, la verificación en
+  navegador y el registro en `DESIGN.md`. Impeccable sigue sin usarse como herramienta; la skill
+  adapta algunas de sus ideas.

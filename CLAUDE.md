@@ -85,6 +85,7 @@ verifican los criterios de aceptación en el paso 7 del ciclo.
 |---|---|
 | Project constitution (SDD non-negotiables) | `02-DOCS/wiki/sdd/constitution.md` |
 | Registro de decisiones | `02-DOCS/wiki/sdd/decisions.md` |
+| Para quién es y para qué | `docs/product.md` |
 | Qué hace la aplicación | `docs/spec.md` |
 | Cómo se ve | `docs/design-direction.md` |
 

@@ -122,7 +122,7 @@ index.html          única pantalla
 css/                tokens, base y componentes
 js/                 módulos de una responsabilidad cada uno
 tests/              suite de Vitest
-docs/               especificación, dirección visual y ADRs
+docs/               producto, especificación, dirección visual y ADRs
 02-DOCS/            constitución, decisiones y registros del flujo de desarrollo
 ```
 

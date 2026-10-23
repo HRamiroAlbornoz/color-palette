@@ -1,7 +1,7 @@
 ---
 author: HRamiroAlbornoz
 branch: chore/security-headers
-status: in-progress
+status: done
 ---
 # Cabeceras de seguridad
 
@@ -23,9 +23,9 @@ colara una inyección o si otro sitio quisiera meter la página en un `<iframe>`
 
 - [x] Tests en `smoke.test.js` — prueba: rojo antes de escribir las cabeceras.
 - [x] Cabeceras en `vercel.json` — prueba: los mismos tests en verde.
-- [ ] La app funciona con la CSP — prueba: preview de Vercel sin violaciones de CSP en la consola y con generar, copiar, tema y archivo andando.
+- [x] La app funciona con la CSP — prueba: preview de Vercel sin violaciones de CSP en la consola y con generar, copiar, tema y archivo andando.
 - [x] Barra de calidad — prueba: lint, Prettier y `npm test` en verde.
-- [ ] Documento cerrado en el último commit del PR — prueba: `status: done` antes del merge.
+- [x] Documento cerrado en el último commit del PR — prueba: `status: done` antes del merge.
 
 ## Evidence
 
@@ -34,8 +34,17 @@ colara una inyección o si otro sitio quisiera meter la página en un `<iframe>`
 - El test del hash puede fallar: con un espacio de más en el script del `<head>` falló, y volvió a
   verde al revertirlo; `git diff index.html` quedó vacío.
 - Barra: lint sin errores, Prettier limpio, `9 passed (9)` archivos y `154 passed (154)` tests.
+- Preview de Vercel (PR #20), en Chrome con la extensión de Claude:
+  - Cabeceras recibidas: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
+    `Referrer-Policy`, `Permissions-Policy` y la CSP, que contiene el hash del script y
+    `frame-ancestors 'none'`, sin `unsafe-inline`.
+  - Con la CSP activa: generar (1 → 2), tema oscuro, guardar lote («Paleta guardada en el
+    archivo.») y copiar con un clic real («Copiado #B44150»); las fuentes Geist cargadas y las
+    muestras pintadas.
+  - Al recargar con el tema oscuro guardado, ningún aviso de CSP en la consola: el script del
+    `<head>` corrió, así que el hash es el correcto.
+  - El lote y el tema de prueba se borraron del `localStorage` del preview al terminar.
 
 ## Next
 
-Verificar la CSP en el preview de Vercel: cabeceras recibidas, consola sin violaciones propias de la
-app, y generar, copiar, cambiar tema y guardar un lote andando.
+Ninguno. Entra a `main` con el PR de la rama `chore/security-headers`.

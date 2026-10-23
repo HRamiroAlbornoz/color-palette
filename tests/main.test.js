@@ -30,6 +30,30 @@ function pressSpaceOnPage() {
   );
 }
 
+function blurFocusedElementInside(disabledControl, focused) {
+  disabledControl.disabled = false;
+  focused.blur();
+  disabledControl.disabled = true;
+}
+
+function emulateBrowserFocusFixup() {
+  const observer = new MutationObserver((mutations) => {
+    const focused = document.activeElement;
+    const disabledControlAroundFocus = mutations
+      .map(({ target }) => target)
+      .find((target) => target.disabled && target.contains(focused));
+    if (disabledControlAroundFocus) {
+      blurFocusedElementInside(disabledControlAroundFocus, focused);
+    }
+  });
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['disabled'],
+    subtree: true,
+  });
+  return () => observer.disconnect();
+}
+
 function clickByLabel(label) {
   document.querySelector(`[aria-label="${label}"]`).click();
 }
@@ -60,6 +84,20 @@ describe('main.js', () => {
     await waitForPendingWork();
 
     expect(generationNumber()).toBe('2');
+  });
+
+  it('keeps the focus on Generar paleta after generating, so keyboard users stay where they were', async () => {
+    await startApp();
+    const stopFocusFixup = emulateBrowserFocusFixup();
+    const generateButton = document.querySelector('#generate-button');
+    generateButton.focus();
+
+    generateButton.click();
+    await waitForPendingWork();
+
+    expect(generationNumber()).toBe('2');
+    expect(document.activeElement).toBe(generateButton);
+    stopFocusFixup();
   });
 
   it.each([

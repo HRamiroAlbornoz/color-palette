@@ -262,6 +262,7 @@ async function generatePalette() {
     return;
   }
 
+  const focusedBeforeGenerating = document.activeElement;
   isGenerating = true;
   setControlsDisabled(true);
   try {
@@ -274,6 +275,16 @@ async function generatePalette() {
   } finally {
     isGenerating = false;
     setControlsDisabled(false);
+    returnFocusLostWhileDisabled(focusedBeforeGenerating);
+  }
+}
+
+function returnFocusLostWhileDisabled(focusedBeforeGenerating) {
+  const focusWasLost = document.activeElement === document.body;
+  const canReturn =
+    focusedBeforeGenerating !== document.body && focusedBeforeGenerating?.isConnected;
+  if (focusWasLost && canReturn) {
+    focusedBeforeGenerating.focus();
   }
 }
 

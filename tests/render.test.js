@@ -628,4 +628,47 @@ describe('waitForSwatchesToExit', () => {
     await expect(donePromise).resolves.toEqual([undefined]);
     document.documentElement.style.removeProperty('--transition-base');
   });
+
+  describe('reads the duration token with its unit', () => {
+    const PENDING_PROMISE_STEPS = 10;
+
+    async function isSettled(promise) {
+      let settled = false;
+      promise.then(() => {
+        settled = true;
+      });
+      for (let step = 0; step < PENDING_PROMISE_STEPS; step += 1) {
+        await Promise.resolve();
+      }
+      return settled;
+    }
+
+    afterEach(() => {
+      document.documentElement.style.removeProperty('--transition-base');
+    });
+
+    it.each(['200ms', '0.2s'])(
+      'waits the full 200 milliseconds when the token is %s',
+      async (token) => {
+        vi.useFakeTimers();
+        document.documentElement.style.setProperty('--transition-base', token);
+
+        const donePromise = waitForSwatchesToExit([document.createElement('li')]);
+        vi.advanceTimersByTime(199);
+        const settledEarly = await isSettled(donePromise);
+        vi.advanceTimersByTime(1);
+
+        expect(settledEarly).toBe(false);
+        expect(await isSettled(donePromise)).toBe(true);
+      },
+    );
+
+    it('does not wait at all when the token is missing', async () => {
+      vi.useFakeTimers();
+
+      const donePromise = waitForSwatchesToExit([document.createElement('li')]);
+
+      expect(await isSettled(donePromise)).toBe(true);
+    });
+  });
 });

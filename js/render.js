@@ -260,9 +260,22 @@ export function focusBatchButton(container, selector) {
   container.querySelector(selector)?.focus();
 }
 
+const MILLISECONDS_PER_SECOND = 1000;
+const CSS_DURATION_PATTERN = /^(\d*\.?\d+)(ms|s)$/;
+
+function parseCssDurationInMs(value) {
+  const match = value.trim().match(CSS_DURATION_PATTERN);
+  if (!match) {
+    return 0;
+  }
+
+  const [, amount, unit] = match;
+  return unit === 's' ? Number(amount) * MILLISECONDS_PER_SECOND : Number(amount);
+}
+
 function getExitAnimationDuration() {
   const value = getComputedStyle(document.documentElement).getPropertyValue('--transition-base');
-  return parseFloat(value) || 0;
+  return parseCssDurationInMs(value);
 }
 
 function waitForSwatchExit(swatch, durationMs) {

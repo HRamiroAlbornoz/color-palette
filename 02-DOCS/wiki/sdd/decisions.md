@@ -73,3 +73,17 @@ Las decisiones anteriores a este registro están en `docs/adr/` (ADR 0001 a 0003
   `css/tokens.css` fijan colores y tipografías, y la skill aporta la composición, la verificación en
   navegador y el registro en `DESIGN.md`. Impeccable sigue sin usarse como herramienta; la skill
   adapta algunas de sus ideas.
+
+## 2026-10-23 · Cabeceras de seguridad
+
+- **Opciones:** dejar solo el HSTS que pone Vercel; agregar cabeceras sin CSP; agregar cabeceras con
+  una CSP estricta.
+- **Elegida:** CSP estricta más `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` y
+  `Permissions-Policy`, todas en `vercel.json`.
+- **Motivo:** son capas de defensa: limitan el daño si alguna vez se colara una inyección y evitan
+  que otro sitio meta la página en un `<iframe>`. La CSP solo permite recursos del propio origen; el
+  script inline del `<head>` se autoriza por su hash (restricción 6 de la spec) y un test en
+  `tests/smoke.test.js` exige que el hash coincida. `img-src` admite `data:` por el favicon embebido.
+- **Efecto conocido:** en los previews, la barra de comentarios que Vercel inyecta desde
+  `vercel.live` queda bloqueada y deja avisos de CSP en la consola. Se acepta: es una herramienta de
+  revisión, no parte de la app, y abrirle la CSP contradiría el principio 16.
